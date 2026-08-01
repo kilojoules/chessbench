@@ -1,0 +1,32 @@
+[project]
+name = "chessbench"
+version = "0.1.0"
+description = "Time-to-first-illegal-move benchmark: LLMs vs Stockfish, standard vs Chess960, board-visibility ablation"
+requires-python = ">=3.11"
+dependencies = [
+    "chess>=1.11",
+    "litellm>=1.65",
+    "tenacity>=8",  # litellm's retry path imports it lazily
+    "pillow>=10",  # GIF animations (chessbench-anim)
+]
+
+[project.scripts]
+chessbench = "chessbench.run:main"
+chessbench-viz = "chessbench.viz:main"
+chessbench-anim = "chessbench.animate:main"
+
+[project.optional-dependencies]
+analysis = ["lifelines>=0.29", "pandas>=2", "matplotlib>=3.8"]
+
+[dependency-groups]
+dev = ["pytest>=8"]
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["chessbench"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
