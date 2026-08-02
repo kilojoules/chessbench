@@ -54,16 +54,16 @@ _No context-overflow attempts detected._
 
 ## Illegal-move error taxonomy
 
-| cell | (phantom-standard) | illegal-castling | into-check-or-pin | own-piece-capture | piece-cannot-reach |
-|---|---|---|---|---|---|
-| chess960 × history+board | 5 | 12 | 0 | 4 | 60 |
-| chess960 × history-only | 4 | 22 | 0 | 5 | 42 |
-| standard × history+board | 0 | 19 | 1 | 1 | 43 |
-| standard × history-only | 0 | 31 | 0 | 3 | 55 |
-| standard-offbook × history+board | 0 | 24 | 1 | 2 | 40 |
-| standard-offbook × history-only | 0 | 11 | 1 | 13 | 50 |
+| cell | (phantom-standard) | (stale-state) | illegal-castling | into-check-or-pin | own-piece-capture | piece-cannot-reach |
+|---|---|---|---|---|---|---|
+| chess960 × history+board | 5 | 28 | 12 | 0 | 4 | 60 |
+| chess960 × history-only | 4 | 10 | 22 | 0 | 5 | 42 |
+| standard × history+board | 0 | 32 | 19 | 1 | 1 | 43 |
+| standard × history-only | 0 | 43 | 31 | 0 | 3 | 55 |
+| standard-offbook × history+board | 0 | 22 | 24 | 1 | 2 | 40 |
+| standard-offbook × history-only | 0 | 42 | 11 | 1 | 13 | 50 |
 
-_`(phantom-standard)` counts chess960 illegal attempts that would have been LEGAL replaying the same movetext from the standard start — the direct signature of standard-geometry pattern matching._
+_`(phantom-standard)` counts chess960 illegal attempts that would have been LEGAL replaying the same movetext from the standard start — the direct signature of standard-geometry pattern matching. `(stale-state)` counts attempts legal at a position 1–6 plies earlier — state-tracking lag; in board-shown cells these contradict the very board displayed in the prompt._
 
 ## Sensitivity: illegal-only events
 

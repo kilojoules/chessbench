@@ -72,6 +72,7 @@ def load_run_dirs(run_dirs: list[Path]) -> tuple[list[dict], list[dict], Counter
                                 "variant": game["variant"],
                                 "visibility": game["visibility"],
                                 "model": game["model"],
+                                "start_fen": game["start_fen"],
                                 "fen_before": r["fen_before"],
                                 "candidate": r.get("candidate"),
                                 "history": list(sans),
@@ -303,6 +304,29 @@ def phantom_standard(history: list[str], candidate: str | None) -> bool:
         return False
 
 
+def stale_state(a: dict, max_back: int = 6) -> bool:
+    """Was the illegal candidate LEGAL at any of the previous `max_back`
+    positions of this game? A stale-state error means the model played
+    against an outdated board — the direct signature of state-tracking lag
+    (particularly damning in board-shown cells, where the current position
+    was displayed in the very prompt)."""
+    board = chess.Board(a["start_fen"], chess960=a["variant"] == "chess960")
+    boards = [board.copy()]
+    try:
+        for san in a["history"]:
+            board.push_san(san)
+            boards.append(board.copy())
+    except ValueError:
+        return False
+    for back in range(2, min(max_back + 1, len(boards)) + 1):
+        try:
+            boards[-back].parse_san(a["candidate"] or "")
+            return True
+        except ValueError:
+            continue
+    return False
+
+
 def taxonomy_table(illegals: list[dict]) -> dict:
     out: dict = {}
     for a in illegals:
@@ -311,6 +335,8 @@ def taxonomy_table(illegals: list[dict]) -> dict:
         c[classify_illegal(a["fen_before"], a["candidate"], a["variant"] == "chess960")] += 1
         if a["variant"] == "chess960" and phantom_standard(a["history"], a["candidate"]):
             c["(phantom-standard)"] += 1
+        if stale_state(a):
+            c["(stale-state)"] += 1
     return out
 
 
@@ -400,7 +426,10 @@ def write_report(df, df_illonly, games: list[dict], illegals: list[dict],
         parts.append(_md_table(["cell"] + classes, rows))
         parts.append("\n_`(phantom-standard)` counts chess960 illegal attempts that would "
                      "have been LEGAL replaying the same movetext from the standard start — "
-                     "the direct signature of standard-geometry pattern matching._\n")
+                     "the direct signature of standard-geometry pattern matching. "
+                     "`(stale-state)` counts attempts legal at a position 1–6 plies earlier — "
+                     "state-tracking lag; in board-shown cells these contradict the very board "
+                     "displayed in the prompt._\n")
     else:
         parts.append("_no illegal attempts logged_\n")
 
