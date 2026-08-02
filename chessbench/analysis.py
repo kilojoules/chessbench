@@ -188,27 +188,38 @@ def games_raster(df, out_path: Path) -> None:
     import matplotlib.pyplot as plt
 
     cells = sorted(df["cell"].unique())
-    fig, ax = plt.subplots(figsize=(7.5, 8.5), dpi=200)
+    fig, ax = plt.subplots(figsize=(7.5, 9.5), dpi=200)
     y = 0
     yticks, ylabels = [], []
     for cell in cells:
-        sub = df[df["cell"] == cell].sort_values(["T", "E"], ascending=[False, True])
-        variant, visibility = sub.iloc[0]["variant"], sub.iloc[0]["visibility"]
+        cell_df = df[df["cell"] == cell]
+        variant, visibility = cell_df.iloc[0]["variant"], cell_df.iloc[0]["visibility"]
         color = VARIANT_COLOR.get(variant, INK_2)
         y_start = y
-        for _, r in sub.iterrows():
-            ax.hlines(y, 0, r["T"], color=color, linewidth=2,
-                      alpha=0.45 if visibility == "history-only" else 0.85)
-            if r["E"]:
-                ax.plot(r["T"], y, "o", color=color, markersize=3.5)
-            else:
-                ax.plot(r["T"], y, ">", color=color, markersize=4,
-                        markerfacecolor="none")
-            y += 1
-        yticks.append((y_start + y - 1) / 2)
+        # Sub-block per playing color: the color control, visible — each
+        # cell shows its as-White and as-Black silhouettes side by side.
+        for black in (0, 1):
+            sub = cell_df[cell_df["black"] == black].sort_values(
+                ["T", "E"], ascending=[False, True])
+            if sub.empty:
+                continue
+            block_start = y
+            for _, r in sub.iterrows():
+                ax.hlines(y, 0, r["T"], color=color, linewidth=2,
+                          alpha=0.45 if visibility == "history-only" else 0.85)
+                if r["E"]:
+                    ax.plot(r["T"], y, "o", color=color, markersize=3.5)
+                else:
+                    ax.plot(r["T"], y, ">", color=color, markersize=4,
+                            markerfacecolor="none")
+                y += 1
+            ax.text(-0.25, (block_start + y - 1) / 2, "B" if black else "W",
+                    ha="right", va="center", fontsize=7, color=INK_2)
+            y += 1  # thin gap between color blocks
+        yticks.append((y_start + y - 2) / 2)
         ylabels.append(cell.replace(" × history+board", " · board")
                        .replace(" × history-only", " · blind"))
-        y += 3  # gap between cells
+        y += 2  # gap between cells
     ax.set_yticks(yticks)
     ax.set_yticklabels(ylabels, fontsize=8, color=INK)
     ax.invert_yaxis()
