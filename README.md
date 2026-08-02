@@ -9,12 +9,23 @@ of the board* vs *pattern-matching on memorized move sequences*.
 
 ## The experiment
 
-Each game crosses two factors (pre-registered design, [PLAN.md](PLAN.md) §7):
+A 2 × 3 factorial (pre-registered design, [PLAN.md](PLAN.md) §7): three game
+types that progressively remove things the model might be relying on —
 
-| Factor | Levels | What it manipulates |
-|---|---|---|
-| **Board visibility** | `history+board` (current FEN + diagram every turn) vs `history-only` (blindfold: start position + move list) | whether the model must *track* state or is *given* it |
-| **Variant** | `standard` vs `chess960` (shuffled back rank) vs `standard-offbook` (standard rules, random 6-ply opening) | whether memorized openings apply; offbook is the bridge that separates *off-book* from *off-geometry* |
+| | `standard` | `standard-offbook` | `chess960` |
+|---|:---:|:---:|:---:|
+| memorized openings apply | ✓ | ✗ | ✗ |
+| familiar board geometry | ✓ | ✓ | ✗ |
+
+(`standard-offbook` = normal chess with a seeded random 6-ply opening;
+`chess960` = shuffled back rank) — each crossed with **board visibility**:
+
+- **board shown** — the current FEN + diagram is in every prompt (state is *given*)
+- **blindfold** — move history only (state must be *tracked*, or pattern-matched around)
+
+The contrasts then read straight off the design: `standard → offbook`
+isolates losing the book; `offbook → chess960` isolates losing the
+geometry; `board → blindfold` isolates losing explicit state.
 
 The opponent is weakened Stockfish (skill 3, node-capped) so games last long
 enough to measure. The primary event is the first illegal-or-ambiguous
