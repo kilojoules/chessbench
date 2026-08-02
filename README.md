@@ -1,113 +1,135 @@
 # chessbench
 
-Benchmark measuring **time-to-first-illegal-move** for LLMs playing chess
-against Stockfish, across a visibility × variant design:
+**When do LLMs start playing illegal chess moves — and why?**
 
-- **Board visibility:** `history-only` (blindfold: start FEN + SAN move list)
-  vs `history+board` (plus current FEN and ASCII board each turn)
-- **Variant:** `standard` vs `chess960` (fixed seeded set of Fischer Random
-  start positions, paired across cells) vs `standard-offbook` (standard
-  rules with a seeded random 6-ply opening — the bridge condition that
-  separates "off-book" from "off-geometry")
+An LLM plays chess against Stockfish. We measure the **time to its first
+illegal-move attempt** as a survival outcome, across conditions chosen to
+separate two explanations of LLM chess ability: *maintaining a mental model
+of the board* vs *pattern-matching on memorized move sequences*.
 
-The analysis is pre-registered (PLAN.md §7): survival analysis on the
-LLM-move-index scale, a cause-specific Cox model with the
-blindfold×chess960 interaction as the theory-laden prediction, and an
-illegal-move error taxonomy including the `phantom-standard` class (moves
-that would have been legal from the standard start — the signature of
-standard-geometry pattern matching).
+## The experiment
 
-Full design rationale, prior-art survey, and analysis plan: [PLAN.md](PLAN.md).
+Each game crosses two factors (pre-registered design, [PLAN.md](PLAN.md) §7):
 
-## Example games (qwen3:4b pilot, one game per cell)
+| Factor | Levels | What it manipulates |
+|---|---|---|
+| **Board visibility** | `history+board` (current FEN + diagram every turn) vs `history-only` (blindfold: start position + move list) | whether the model must *track* state or is *given* it |
+| **Variant** | `standard` vs `chess960` (shuffled back rank) vs `standard-offbook` (standard rules, random 6-ply opening) | whether memorized openings apply; offbook is the bridge that separates *off-book* from *off-geometry* |
 
-Red frames show the model's failed attempts (what it tried, and the failure
-class) before the ply resolved. Generated with `chessbench-anim`.
+The opponent is weakened Stockfish (skill 3, node-capped) so games last long
+enough to measure. The primary event is the first illegal-or-ambiguous
+attempt, on the LLM-move-index time scale; colors are balanced and
+decorrelated from start positions; retries, forfeit rules, censoring, and
+the analysis model (cause-specific Cox with a pre-registered
+blindfold×chess960 interaction) are all frozen in the prereg before data
+collection. An **error taxonomy** classifies each illegal attempt, including
+the `phantom-standard` class: a move that would have been *legal* if the
+same movetext had been played from the standard starting position — the
+direct signature of pattern-matching on standard-chess geometry.
+
+## Results so far (local pilots, 120 games per model)
+
+### qwen2.5:7b — the first tier with real separation
+
+![Kaplan-Meier curves, qwen2.5:7b](docs/results/qwen25-7b-pilot/km.png)
+
+| Pre-registered test | Result |
+|---|---|
+| **Chess960 effect (H3)** | **HR 3.00**, 90% CI [1.46, 6.16], p = .012 — shuffled geometry triples the illegal-move hazard |
+| **Off-book effect** | **HR 3.27**, 90% CI [1.30, 8.24], p = .035 — a random opening *alone* also triples it |
+| **Geometry beyond off-book** | ≈ nothing — the two effects are statistically indistinguishable: leaving the memorized move distribution, not the unfamiliar board, is what breaks the model |
+| **Blindfold main effect (H2)** | HR 0.71, p = .11 (n.s.) — trend *protective*: history-only play is, if anything, easier than reading a board diagram |
+| **Blindfold×960 interaction (H4)** | HR 1.45, p = .28 — positive (the pattern-matching prediction) but underpowered at 20 games/cell |
+| **Color equivalence (H1)** | HR(black) 0.94, CI [0.65, 1.37] — inconclusive at this tier |
+
+**The mechanism finding:** 47 illegal attempts in the chess960 cells were
+`phantom-standard` — legal moves *on the board that wasn't there* — versus
+**zero** in every other variant. Blindfolded, the phantom rate **doubles**
+(31 vs 16): without a board in view, the model reverts to its memorized
+standard-chess geometry twice as often. Full report:
+[docs/results/qwen25-7b-pilot](docs/results/qwen25-7b-pilot/report.md).
+
+### qwen2.5:3b — below the benchmark's floor
+
+Median first event at move 1–2 in every cell; condition effects
+unidentifiable (as the pre-registration's power analysis anticipated for
+weak models), though color equivalence formally held (HR 1.02, CI
+[0.70, 1.48]) and phantom-standard errors again appeared *only* in
+chess960 cells. Report:
+[docs/results/qwen25-pilot](docs/results/qwen25-pilot/report.md).
+
+### Example games (qwen2.5:7b, longest game per cell)
+
+Red frames show failed attempts — what the model tried, and the failure
+class — before each ply resolved.
 
 <table>
-<tr>
-<th></th>
-<th>board shown each turn</th>
-<th>blindfold (history only)</th>
-</tr>
-<tr>
-<th>standard</th>
-<td><img src="docs/media/ollama_chat-qwen3-4b__standard__board__sp518__g000__w.gif" width="380" alt="standard, board shown"><br><sub>survived to the 20-ply cap; first illegal attempt at ply 13</sub></td>
-<td><img src="docs/media/ollama_chat-qwen3-4b__standard__blind__sp518__g000__w.gif" width="380" alt="standard, blindfold"><br><sub>forfeit at ply 10; first illegal attempt at ply 9</sub></td>
-</tr>
-<tr>
-<th>chess960</th>
-<td><img src="docs/media/ollama_chat-qwen3-4b__chess960__board__sp105__g000__w.gif" width="380" alt="chess960, board shown"><br><sub>censored at ply 4: thinking exhausted the token budget</sub></td>
-<td><img src="docs/media/ollama_chat-qwen3-4b__chess960__blind__sp105__g000__w.gif" width="380" alt="chess960, blindfold"><br><sub>forfeit at ply 2; first illegal attempt at ply 3</sub></td>
-</tr>
+<tr><th></th><th>board shown</th><th>blindfold</th></tr>
+<tr><th>standard</th>
+<td><img src="docs/media/7b-standard-board.gif" width="290" alt="standard, board"></td>
+<td><img src="docs/media/7b-standard-blind.gif" width="290" alt="standard, blindfold"></td></tr>
+<tr><th>chess960</th>
+<td><img src="docs/media/7b-chess960-board.gif" width="290" alt="chess960, board"></td>
+<td><img src="docs/media/7b-chess960-blind.gif" width="290" alt="chess960, blindfold"></td></tr>
+<tr><th>offbook</th>
+<td><img src="docs/media/7b-offbook-board.gif" width="290" alt="offbook, board"></td>
+<td><img src="docs/media/7b-offbook-blind.gif" width="290" alt="offbook, blindfold"></td></tr>
 </table>
 
-For interactive playback (move list, raw model output per failed attempt),
-generate the self-contained HTML viewer: `uv run chessbench-viz runs/<name>`.
+## Validity engineering
 
-## Setup
+The harness treats measurement validity as the product. Notable guards, each
+added after a failure that would otherwise have silently poisoned data:
 
-```sh
-brew install stockfish
-uv sync
-```
+- **Staged move extraction** (`MOVE:` protocol → inline → `\boxed{}` →
+  bare-SAN last line), so format compliance isn't confounded with chess
+  ability; every attempt records its extraction stage for strict-protocol
+  sensitivity analyses. A strict parser was demonstrably *suppressing the
+  benchmark's own signal* (misclassifying real illegal attempts as format
+  noise).
+- **Infrastructure quarantine**: truncation, context-window overflow, and
+  dead-server empty responses are never graded as chess; persistent cases
+  censor or abort, and censoring is reported per cell (it is
+  condition-correlated — hard positions provoke longer generations).
+- **Context-shifting guard**: ollama models can't run without an explicit,
+  sufficient context window (its silent 4096 default drops the system
+  prompt mid-generation); per-attempt token accounting flags any overflow.
+- **Startup health probe + circuit breaker + self-healing supervisor**
+  (`scripts/run_supervised.sh`): a crashed local GPU backend becomes a loud
+  restart-and-resume, not fake forfeits.
+- **Self-documenting records**: every game logs the verbatim system prompt
+  and per-attempt request prompts; the wire-level engine config
+  (UCI_Chess960 etc.) was verified against the UCI protocol stream.
 
-Real models go through [litellm](https://docs.litellm.ai/docs/providers), so
-set the relevant key (`ANTHROPIC_API_KEY`, `OPENAI_API_KEY`, …) and use its
-model strings.
-
-## Usage
-
-```sh
-# Offline dry run of the full 2x2 (no API keys needed):
-uv run chessbench --model fake:random --games-per-cell 2 --out runs/smoke
-
-# List the planned games for a real run without playing:
-uv run chessbench --model anthropic/claude-sonnet-5 --list
-
-# The real thing:
-uv run chessbench --model anthropic/claude-sonnet-5 --games-per-cell 30 --out runs/main
-
-# Pre-registered analysis (KM curves, hazard plot, Cox model, error taxonomy):
-uv sync --extra analysis
-uv run chessbench-analyze runs/main
-
-# Animations (GIF per game) and the interactive viewer:
-uv run chessbench-anim runs/main -o runs/main/anim
-uv run chessbench-viz runs/main
-```
-
-Runs are resumable: a game whose JSONL already contains its final
-`{"type": "game"}` record is skipped, so re-running the same command
-continues where it left off.
-
-## Output
-
-Per game, in `--out`:
-
-- `<game_id>.jsonl` — one record per LLM move attempt (raw output, parse
-  class `legal|illegal|ambiguous|invalid`, FEN before, eval, tokens,
-  latency), engine moves, and a final `{"type": "game"}` summary record
-  (termination, survival ply, censoring status).
-- `<game_id>.pgn` — the game, with FEN/variant headers for Chess960.
-- `manifest-<timestamp>.json` — full run configuration, engine version,
-  position set and seeds.
-
-Failure taxonomy maps 1:1 onto python-chess exceptions: `invalid`
-(unparseable), `illegal` (well-formed but illegal), `ambiguous`
-(underspecified SAN). The survival event is the *first* illegal-or-ambiguous
-attempt; retries (default 3 per ply, with minimal feedback that never leaks
-board state) only affect game continuation. Truncated responses
-(`finish_reason=length`) are an infrastructure category: retried, never
-graded as chess failures, and persistent truncation censors the game
-(`censored_infra`) rather than recording a loss — raise `--max-tokens` for
-reasoning models.
-
-## Tests
+## Running it
 
 ```sh
-uv run pytest
+brew install stockfish && uv sync
+# local model via ollama:
+uv run chessbench --model ollama_chat/qwen2.5:7b --games-per-cell 20 --variant all --out runs/mine
+# API model via litellm (set the provider key):
+uv run chessbench --model anthropic/claude-sonnet-5 --games-per-cell 30 --out runs/sonnet
+
+# pre-registered analysis (KM, hazard, Cox, taxonomy):
+uv sync --extra analysis && uv run chessbench-analyze runs/mine
+
+# visualizations:
+uv run chessbench-viz runs/mine        # interactive HTML viewer
+uv run chessbench-anim runs/mine       # GIF per game
 ```
 
-Engine integration tests are skipped automatically if `stockfish` is not on
-`PATH`.
+Runs are resumable (completed games are never replayed), parallelizable
+(`--parallel`), and long local runs should use
+`scripts/run_supervised.sh <out_dir> <args...>` for self-healing.
+Offline dry runs: `--model fake:random`. Tests: `uv run pytest` (83 tests).
+
+## Roadmap
+
+- More games/cell at 7B for H4 power; a 14B local tier.
+- Frontier-model arm via API (the design is provider-agnostic through
+  litellm).
+- Thinking-mode arm (qwen3-class models think unboundedly on hard
+  positions — itself a documented observation — so this arm needs API
+  models or bigger hardware).
+- State-probe side-queries and CPL-from-PGN analyses per the prereg's
+  planned additions.
