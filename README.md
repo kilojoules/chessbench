@@ -37,14 +37,44 @@ direct signature of pattern-matching on standard-chess geometry.
 
 ![Effects and mechanisms, qwen2.5:7b](docs/results/qwen25-7b-pilot/effects.png)
 
-| Pre-registered test | Result |
-|---|---|
-| **Chess960 effect (H3)** | **HR 3.00**, 90% CI [1.46, 6.16], p = .012 — shuffled geometry triples the illegal-move hazard |
-| **Off-book effect** | **HR 3.27**, 90% CI [1.30, 8.24], p = .035 — a random opening *alone* also triples it |
-| **Geometry beyond off-book** | ≈ nothing — the two effects are statistically indistinguishable: leaving the memorized move distribution, not the unfamiliar board, is what breaks the model |
-| **Blindfold main effect (H2)** | HR 0.71, p = .11 (n.s.) — trend *protective*: history-only play is, if anything, easier than reading a board diagram |
-| **Blindfold×960 interaction (H4)** | HR 1.45, p = .28 — positive (the pattern-matching prediction) but underpowered at 20 games/cell |
-| **Color equivalence (H1)** | HR(black) 0.94, CI [0.65, 1.37] — inconclusive at this tier |
+#### How to read the numbers
+
+The **hazard** is the per-move risk of the first illegal attempt: the
+probability the model commits one at move $k$ given it hasn't yet,
+
+```math
+h(k) \;=\; \Pr\big(\text{first illegal attempt at move } k \,\big|\, \text{no illegal attempt before } k\big).
+```
+
+The Cox model assumes each condition multiplies a shared baseline risk
+$h_0(k)$ by a constant:
+
+```math
+h(k \mid x) \;=\; h_0(k)\,\exp\big(\beta_1\,\mathrm{blind} + \beta_2\,\mathrm{960} + \beta_3\,\mathrm{offbook} + \beta_4\,\mathrm{blind{\times}960} + \beta_5\,\mathrm{blind{\times}offbook} + \beta_6\,\mathrm{Black}\big),
+```
+
+and the **hazard ratio** for factor $j$ is that multiplier:
+
+```math
+\mathrm{HR}_j \;=\; e^{\beta_j} \;=\; \frac{h(k \mid x_j{=}1)}{h(k \mid x_j{=}0)}.
+```
+
+$\mathrm{HR} > 1$ means the first illegal move arrives sooner than in the
+baseline cell (standard chess, board shown, playing White); $\mathrm{HR} = 1$
+means no effect. Survival framing is used because it handles censored games
+and unequal exposure correctly — "% of games with an illegal move" would
+conflate failing fast with playing long.
+
+#### Pre-registered tests (qwen2.5:7b, 90% CIs)
+
+| Test | HR | 90% CI | p | Reading |
+|---|---:|:---:|---:|---|
+| chess960 (H3) | **3.00** | [1.46, 6.16] | .012 | shuffled start **triples** per-move risk |
+| offbook | **3.27** | [1.30, 8.24] | .035 | a random opening *alone* does the same — off-book, not geometry, breaks the model |
+| blindfold (H2) | 0.71 | [0.50, 1.01] | .11 | trend *protective*: history-only ≤ risk of board-shown |
+| blindfold × 960 (H4) | 1.45 | [0.83, 2.52] | .28 | positive (pattern-matching prediction), underpowered at 20/cell |
+| blindfold × offbook | 0.67 | [0.29, 1.54] | .43 | inconclusive |
+| plays Black (H1) | 0.94 | [0.65, 1.37] | — | equivalence vs margin [0.67, 1.5]: inconclusive at this tier |
 
 **The mechanism finding:** 47 illegal attempts in the chess960 cells were
 `phantom-standard` — legal moves *on the board that wasn't there* — versus
