@@ -53,6 +53,18 @@ def play_game(spec: GameSpec, llm, engine, out_dir: Path) -> dict:
             f.write(json.dumps(rec, ensure_ascii=False) + "\n")
             f.flush()
 
+        # Auditability: the exact system prompt is part of the record, so a
+        # game is verifiable without trusting the code at this version.
+        emit(
+            {
+                "type": "game_start",
+                "game_id": spec.game_id,
+                "system_prompt": sys_prompt,
+                "prompt_version": PROMPT_VERSION,
+                "ts": ts_start,
+            }
+        )
+
         # standard-offbook: play the seeded random prefix onto the board.
         # These moves appear in the model's history but are nobody's play;
         # LLM exposure (llm_move_index) starts after them.
@@ -101,6 +113,7 @@ def play_game(spec: GameSpec, llm, engine, out_dir: Path) -> dict:
                 trunc_tries = 0
                 ply_classes: list[str] = []
                 while attempt < spec.max_attempts:
+                    request_prompt = messages[-1]["content"]  # move request or retry feedback
                     resp = llm.complete(messages, board=board)
                     truncated = resp.finish_reason == "length"
                     if truncated:
@@ -136,6 +149,7 @@ def play_game(spec: GameSpec, llm, engine, out_dir: Path) -> dict:
                             "attempt": attempt if not truncated else attempt + 1,
                             "trunc_try": trunc_tries if truncated else None,
                             "fen_before": board_fen(board),
+                            "prompt": request_prompt,
                             "raw_output": resp.text,
                             "extracted": pr.extracted,
                             "candidate": pr.candidate,

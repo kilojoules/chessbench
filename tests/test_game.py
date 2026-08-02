@@ -108,6 +108,23 @@ def test_chess960_game_runs(tmp_path):
     assert "FEN" in pgn_text  # non-standard start recorded in headers
 
 
+def test_game_is_self_documenting(tmp_path):
+    """Auditability: the record itself proves what the model was told."""
+    spec = make_spec("audit", variant="chess960", sp_id=105, max_plies=4)
+    play_game(spec, FakeLLM(policy="first"), StubEngine(), tmp_path)
+    records = read_records(tmp_path / "audit.jsonl")
+    start = records[0]
+    assert start["type"] == "game_start"
+    assert "Chess960" in start["system_prompt"]
+    assert "O-O" in start["system_prompt"]  # castling rules explained
+    attempts = [r for r in records if r["type"] == "attempt"]
+    assert all("prompt" in a for a in attempts)
+    first = attempts[0]
+    # The prompt shown to the model contains the shuffled start as Shredder FEN.
+    assert "qnrbbnkr" in first["prompt"]
+    assert "HChc" in first["prompt"]
+
+
 def test_move_cap_censors(tmp_path):
     spec = make_spec("cap", max_plies=6)
     rec = play_game(spec, FakeLLM(policy="random", seed=1), StubEngine(), tmp_path)
