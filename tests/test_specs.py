@@ -64,6 +64,19 @@ def test_standard_specs_have_no_prefix():
     assert all(s.opening_prefix == () and s.prefix_id is None for s in specs)
 
 
+def test_no_think_wires_native_parameter():
+    from chessbench.run import make_llm
+    from chessbench.config import GameSpec
+    spec = GameSpec(game_id="t", model="ollama_chat/x", variant="standard",
+                    visibility="history-only", sp_id=518, llm_color="white", game_index=0)
+    args = argparse.Namespace(max_tokens=1024, llm_timeout=60, llm_seed=None,
+                              num_ctx=8192, no_think=True)
+    llm = make_llm(spec, args)
+    assert llm.think is False
+    args.no_think = False
+    assert make_llm(spec, args).think is None
+
+
 def test_num_ctx_guard_rejects_unsafe_window():
     import pytest
     from chessbench.run import main

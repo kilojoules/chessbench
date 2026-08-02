@@ -104,6 +104,7 @@ def make_llm(spec: GameSpec, args: argparse.Namespace):
         timeout=args.llm_timeout,
         seed=args.llm_seed,
         num_ctx=args.num_ctx,
+        think=False if args.no_think else None,
     )
 
 

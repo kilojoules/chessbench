@@ -61,6 +61,9 @@ class LiteLLMClient:
         num_ctx: int | None = None,  # ollama context window; its 4096 default
                                      # silently context-shifts long thinking,
                                      # dropping the system prompt mid-move
+        think: bool | None = None,  # ollama native thinking toggle; the
+                                    # /no_think prompt switch alone is
+                                    # advisory and ignored under load
     ):
         self.model = model
         self.temperature = temperature
@@ -69,6 +72,7 @@ class LiteLLMClient:
         self.num_retries = num_retries
         self.seed = seed
         self.num_ctx = num_ctx
+        self.think = think
         self.effective_temperature = _probe_effective_temperature(model, temperature)
 
     def complete(self, messages: list[dict], board: chess.Board | None = None) -> LLMResponse:
@@ -83,6 +87,8 @@ class LiteLLMClient:
             kwargs["seed"] = self.seed
         if self.num_ctx is not None:
             kwargs["num_ctx"] = self.num_ctx  # ollama-only; dropped elsewhere
+        if self.think is not None and self.model.startswith("ollama"):
+            kwargs["think"] = self.think
         t0 = time.monotonic()
         resp = litellm.completion(
             model=self.model,
