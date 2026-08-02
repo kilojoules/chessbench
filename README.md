@@ -18,8 +18,10 @@ Each game crosses two factors (pre-registered design, [PLAN.md](PLAN.md) §7):
 
 The opponent is weakened Stockfish (skill 3, node-capped) so games last long
 enough to measure. The primary event is the first illegal-or-ambiguous
-attempt, on the LLM-move-index time scale; colors are balanced and
-decorrelated from start positions; retries, forfeit rules, censoring, and
+attempt, on the LLM-move-index time scale. **The model plays both colors:**
+every cell is split 50/50 White/Black (alternating, decorrelated from start
+positions), color enters the Cox model as a covariate, and color equivalence
+is a pre-registered hypothesis (H1). Retries, forfeit rules, censoring, and
 the analysis model (cause-specific Cox with a pre-registered
 blindfold×chess960 interaction) are all frozen in the prereg before data
 collection. An **error taxonomy** classifies each illegal attempt, including

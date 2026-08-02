@@ -36,6 +36,19 @@ H4 is the `blind_x_960` row: positive log-HR = blindfold hurts more in chess960 
 
 **H1 color equivalence:** HR(black) = 0.94, 90% CI [0.65, 1.37] vs margin [0.67, 1.5] → inconclusive (CI overlaps the margin boundary)
 
+## Color control (White vs Black, per cell)
+
+| cell | as White: n (events, median move) | as Black: n (events, median move) |
+|---|---|---|
+| chess960 × history+board | 10 (10 ev, med 1) | 10 (10 ev, med 3) |
+| chess960 × history-only | 10 (10 ev, med 2) | 10 (10 ev, med 2) |
+| standard × history+board | 10 (10 ev, med 4) | 10 (10 ev, med 3) |
+| standard × history-only | 10 (10 ev, med 5) | 10 (10 ev, med 4) |
+| standard-offbook × history+board | 10 (10 ev, med 2) | 10 (10 ev, med 2) |
+| standard-offbook × history-only | 10 (10 ev, med 2) | 10 (10 ev, med 3) |
+
+_Color is balanced within every cell and enters the Cox model as the `black` covariate; H1 (equivalence) above is the formal test._
+
 ## Censoring / termination by cause (per cell)
 
 | cell | llm_forfeit |

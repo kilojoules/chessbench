@@ -398,6 +398,22 @@ def write_report(df, df_illonly, games: list[dict], illegals: list[dict],
         parts.append(f"_{cox_note}_\n")
     parts.append(f"\n**H1 color equivalence:** {color_equivalence(summary)}\n")
 
+    # Color control
+    parts.append("## Color control (White vs Black, per cell)\n")
+    rows = []
+    for cell, sub in sorted(df.groupby("cell")):
+        row = [cell]
+        for black in (0, 1):
+            s = sub[sub["black"] == black]
+            ev = s.loc[s["E"] == 1, "T"]
+            med = f"{ev.median():.0f}" if len(ev) else "—"
+            row.append(f"{len(s)} ({int(s['E'].sum())} ev, med {med})")
+        rows.append(row)
+    parts.append(_md_table(["cell", "as White: n (events, median move)",
+                            "as Black: n (events, median move)"], rows))
+    parts.append("\n_Color is balanced within every cell and enters the Cox model as "
+                 "the `black` covariate; H1 (equivalence) above is the formal test._\n")
+
     # Censoring by cause
     parts.append("## Censoring / termination by cause (per cell)\n")
     causes = sorted(df["termination"].unique())
