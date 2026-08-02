@@ -16,6 +16,10 @@ class LLMResponse:
     finish_reason: str | None = None
     reasoning_tokens: int | None = None
     reasoning: str | None = None  # separated thinking text, when the provider returns it
+    # True when prompt+output token counts exceed the configured context
+    # window: the provider context-shifted mid-generation, so the model may
+    # have lost its own system prompt — the sample is contaminated.
+    context_overflow: bool = False
 
 
 def _probe_effective_temperature(model: str, temperature: float) -> float | None:
@@ -93,6 +97,11 @@ class LiteLLMClient:
         text = choice.message.content or ""
         usage = getattr(resp, "usage", None)
         details = getattr(usage, "completion_tokens_details", None)
+        overflow = False
+        if self.num_ctx is not None:
+            pt = getattr(usage, "prompt_tokens", 0) or 0
+            ct = getattr(usage, "completion_tokens", 0) or 0
+            overflow = pt >= self.num_ctx or (pt + ct) > self.num_ctx
         return LLMResponse(
             text=text,
             prompt_tokens=getattr(usage, "prompt_tokens", None),
@@ -101,6 +110,7 @@ class LiteLLMClient:
             finish_reason=getattr(choice, "finish_reason", None),
             reasoning_tokens=getattr(details, "reasoning_tokens", None),
             reasoning=getattr(choice.message, "reasoning_content", None),
+            context_overflow=overflow,
         )
 
 

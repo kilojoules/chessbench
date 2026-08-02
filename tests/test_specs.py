@@ -62,3 +62,26 @@ def test_offbook_specs_carry_prefix():
 def test_standard_specs_have_no_prefix():
     specs = build_specs("m", ["standard", "chess960"], ["history-only"], 4, POSITIONS, PREFIXES, _args())
     assert all(s.opening_prefix == () and s.prefix_id is None for s in specs)
+
+
+def test_num_ctx_guard_rejects_unsafe_window():
+    import pytest
+    from chessbench.run import main
+    with pytest.raises(SystemExit):
+        main(["--model", "ollama_chat/x", "--num-ctx", "4096",
+              "--max-tokens", "12288", "--list"])
+
+
+def test_num_ctx_guard_autodefaults_for_ollama(capsys):
+    from chessbench.run import main
+    rc = main(["--model", "ollama_chat/x", "--max-tokens", "8192", "--list"])
+    assert rc == 0
+    out = capsys.readouterr().out
+    assert "defaulting to 12288" in out  # max-tokens + 4096
+
+
+def test_num_ctx_guard_silent_for_api_models(capsys):
+    from chessbench.run import main
+    rc = main(["--model", "anthropic/claude-sonnet-5", "--list"])
+    assert rc == 0
+    assert "[guard]" not in capsys.readouterr().out

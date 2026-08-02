@@ -115,13 +115,15 @@ def play_game(spec: GameSpec, llm, engine, out_dir: Path) -> dict:
                 while attempt < spec.max_attempts:
                     request_prompt = messages[-1]["content"]  # move request or retry feedback
                     resp = llm.complete(messages, board=board)
-                    truncated = resp.finish_reason == "length"
+                    truncated = resp.finish_reason == "length" or resp.context_overflow
                     if truncated:
                         trunc_tries += 1
-                        pr = ParseResult(
-                            "truncated", None, None, None, None,
-                            "response truncated (finish_reason=length)",
+                        reason = (
+                            "context overflow (prompt+output exceeded num_ctx)"
+                            if resp.context_overflow
+                            else "response truncated (finish_reason=length)"
                         )
+                        pr = ParseResult("truncated", None, None, None, None, reason)
                     else:
                         attempt += 1
                         pr = classify_move(board, resp.text)
@@ -159,6 +161,7 @@ def play_game(spec: GameSpec, llm, engine, out_dir: Path) -> dict:
                             "move_uci": pr.move_uci,
                             "parse_error": pr.error,
                             "finish_reason": resp.finish_reason,
+                            "context_overflow": resp.context_overflow,
                             "reasoning": resp.reasoning,
                             "eval_cp_white_before": eval_before,
                             "prompt_tokens": resp.prompt_tokens,
@@ -241,6 +244,7 @@ def play_game(spec: GameSpec, llm, engine, out_dir: Path) -> dict:
             "max_attempts": spec.max_attempts,
             "temperature": spec.temperature,
             "effective_temperature": getattr(llm, "effective_temperature", None),
+            "num_ctx": getattr(llm, "num_ctx", None),
             "prompt_version": PROMPT_VERSION,
             "parser_version": PARSER_VERSION,
             "engine_name": getattr(engine, "name", "unknown"),

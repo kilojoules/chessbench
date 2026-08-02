@@ -41,11 +41,14 @@ CENSOR_CAUSES = ("checkmate", "stalemate", "insufficient_material", "seventyfive
 # Loading
 # --------------------------------------------------------------------------
 
-def load_run_dirs(run_dirs: list[Path]) -> tuple[list[dict], list[dict]]:
-    """Returns (game_records, illegal_attempts). Each illegal attempt carries
-    the SAN history up to that point for the phantom-standard check."""
+def load_run_dirs(run_dirs: list[Path]) -> tuple[list[dict], list[dict], Counter]:
+    """Returns (game_records, illegal_attempts, overflow_by_cell). Each illegal
+    attempt carries the SAN history up to that point for the phantom-standard
+    check; overflow_by_cell counts context-overflow attempts (contaminated
+    samples that were quarantined as infrastructure)."""
     games: list[dict] = []
     illegals: list[dict] = []
+    overflow: Counter = Counter()
     for run_dir in run_dirs:
         for path in sorted(run_dir.glob("*.jsonl")):
             try:
@@ -61,6 +64,8 @@ def load_run_dirs(run_dirs: list[Path]) -> tuple[list[dict], list[dict]]:
                 if r["type"] in ("engine_move", "prefix_move"):
                     sans.append(r["move_san"])
                 elif r["type"] == "attempt":
+                    if r.get("context_overflow"):
+                        overflow[f"{game['variant']} × {game['visibility']}"] += 1
                     if r["parse_class"] == "illegal":
                         illegals.append(
                             {
@@ -74,7 +79,7 @@ def load_run_dirs(run_dirs: list[Path]) -> tuple[list[dict], list[dict]]:
                         )
                     if r["parse_class"] == "legal":
                         sans.append(r["move_san"])
-    return games, illegals
+    return games, illegals, overflow
 
 
 def games_frame(games: list[dict], event_classes: str = "prereg",
@@ -322,7 +327,8 @@ def _md_table(headers: list[str], rows: list[list]) -> str:
 
 
 def write_report(df, df_illonly, games: list[dict], illegals: list[dict],
-                 out_dir: Path, run_dirs: list[Path]) -> Path:
+                 out_dir: Path, run_dirs: list[Path],
+                 overflow: Counter | None = None) -> Path:
     import numpy as np
 
     out_dir.mkdir(parents=True, exist_ok=True)
@@ -377,6 +383,13 @@ def write_report(df, df_illonly, games: list[dict], illegals: list[dict],
     parts.append("\n_`llm_forfeit` rows with no illegal/ambiguous attempt are format "
                  "forfeits (censoring); truncation is infrastructure censoring. Both "
                  "are condition-correlated risks — watch these columns._\n")
+    if overflow:
+        parts.append("\n**Context-overflow attempts** (provider context-shifted "
+                     "mid-generation; quarantined as infrastructure, never graded): "
+                     + ", ".join(f"{cell}: {n}" for cell, n in sorted(overflow.items()))
+                     + "\n")
+    else:
+        parts.append("\n_No context-overflow attempts detected._\n")
 
     # Error taxonomy
     parts.append("## Illegal-move error taxonomy\n")
@@ -419,13 +432,13 @@ def main(argv: list[str] | None = None) -> int:
     except ImportError as e:
         raise SystemExit(f"analysis extras missing ({e.name}); run: uv sync --extra analysis")
 
-    games, illegals = load_run_dirs(args.run_dirs)
+    games, illegals, overflow = load_run_dirs(args.run_dirs)
     if not games:
         raise SystemExit("no completed games found")
     df = games_frame(games)
     df_illonly = games_frame(games, event_classes="illegal-only")
     out_dir = args.out or (args.run_dirs[0] / "analysis")
-    report = write_report(df, df_illonly, games, illegals, out_dir, args.run_dirs)
+    report = write_report(df, df_illonly, games, illegals, out_dir, args.run_dirs, overflow)
     print(f"{report} ({len(df)} games, {int(df['E'].sum())} events)")
     return 0
 

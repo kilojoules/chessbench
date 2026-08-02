@@ -231,6 +231,43 @@ def test_offbook_game_plays_prefix_first(tmp_path):
     assert prefix[0] in prompt
 
 
+class OverflowingLLM:
+    """Simulates ollama context-shifting: finish_reason 'stop' but token
+    counts exceeding the window — then behaves after n overflows."""
+
+    def __init__(self, n_overflows):
+        self.n = n_overflows
+
+    def complete(self, messages, board=None):
+        if self.n > 0:
+            self.n -= 1
+            return LLMResponse("degraded rambling", 0, 0, 0, finish_reason="stop",
+                               context_overflow=True)
+        san = sorted(board.san(m) for m in board.legal_moves)[0]
+        return LLMResponse(f"MOVE: {san}", 0, 0, 0, finish_reason="stop")
+
+
+def test_context_overflow_quarantined_as_infra(tmp_path):
+    spec = make_spec("ctxof", max_plies=4)
+    rec = play_game(spec, OverflowingLLM(2), StubEngine(), tmp_path)
+    assert rec["termination"] == "move_cap"
+    assert rec["counts"]["truncated"] == 2
+    assert rec["counts"]["invalid"] == 0  # rambling never graded as chess
+    assert rec["event"] is False
+    attempts = [r for r in read_records(tmp_path / "ctxof.jsonl") if r["type"] == "attempt"]
+    quarantined = [a for a in attempts if a["context_overflow"]]
+    assert len(quarantined) == 2
+    assert all(a["parse_class"] == "truncated" for a in quarantined)
+    assert "context overflow" in quarantined[0]["parse_error"]
+
+
+def test_persistent_overflow_censors(tmp_path):
+    spec = make_spec("ctxbad")
+    rec = play_game(spec, OverflowingLLM(99), StubEngine(), tmp_path)
+    assert rec["termination"] == "llm_truncated"
+    assert rec["llm_result"] == "censored_infra"
+
+
 def test_persistent_truncation_censors_not_loses(tmp_path):
     spec = make_spec("trunc-bad")
     rec = play_game(spec, TruncatingLLM(99), StubEngine(), tmp_path)

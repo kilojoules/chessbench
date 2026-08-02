@@ -58,7 +58,8 @@ def test_end_to_end_report(tmp_path):
 
 def test_games_frame_survival_columns(tmp_path):
     _make_run(tmp_path, n=2)
-    games, illegals = load_run_dirs([tmp_path])
+    games, illegals, overflow = load_run_dirs([tmp_path])
+    assert sum(overflow.values()) == 0  # FakeLLM never overflows
     df = games_frame(games)
     assert set(["T", "E", "blind", "v960", "black", "unit"]).issubset(df.columns)
     assert (df["T"] > 0).all()

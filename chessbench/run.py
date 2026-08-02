@@ -158,6 +158,18 @@ def main(argv: list[str] | None = None) -> int:
     p.add_argument("--list", action="store_true", help="print the planned games and exit")
     args = p.parse_args(argv)
 
+    # Context-shifting guard: ollama's default 4096-token window silently
+    # drops the oldest context (including the system prompt) when thinking
+    # runs long — a validity bug, not a performance one. Never run an ollama
+    # model without an explicit, sufficient window.
+    if args.num_ctx is None and any(m.startswith("ollama") for m in args.model):
+        args.num_ctx = args.max_tokens + 4096
+        print(f"[guard] --num-ctx not set for an ollama model; defaulting to "
+              f"{args.num_ctx} (max-tokens + 4096) to prevent silent context shifting")
+    if args.num_ctx is not None and args.num_ctx < args.max_tokens + 1024:
+        p.error(f"--num-ctx {args.num_ctx} leaves under 1024 tokens for the prompt at "
+                f"--max-tokens {args.max_tokens}; generation would context-shift or truncate")
+
     if args.variant == "all":
         variants = list(VARIANTS)
     elif args.variant == "both":

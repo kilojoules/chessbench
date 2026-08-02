@@ -247,6 +247,15 @@ where possible for rough comparability.
   disambiguation rule lives in the system prompt instead.
 - **Resume unit:** a game counts as done only when its JSONL has the final
   `{"type": "game"}` record *and* its PGN exists; the PGN is written first.
+- **Context-shifting guard (from the resource audit):** ollama's default
+  4096-token window silently drops the oldest context — including the
+  system prompt — when thinking runs long. Three layers: (1) launch guard —
+  ollama models auto-default `num_ctx = max_tokens + 4096` and an unsafe
+  explicit value is a hard error; (2) per-attempt detection — token counts
+  exceeding the window flag `context_overflow` and the attempt is
+  quarantined as infrastructure (like truncation), never graded as chess;
+  (3) the analysis report counts overflow attempts per cell. Games played
+  before this guard (ctx 4096) were discarded.
 - **Staged extraction (parser v3, from qwen3:4b pilot data):** small models
   ignore the `MOVE:` protocol — they end with "**e4**", "**Answer:** d2-d4",
   or `$$ \boxed{Nf3} $$`, and sometimes *quote* the protocol instructions in
