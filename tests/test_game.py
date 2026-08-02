@@ -68,7 +68,7 @@ def test_always_illegal_loses_at_first_move(tmp_path):
     assert rec["first_illegal_ply"] == 1
     assert rec["first_illegal_llm_move"] == 1
     assert rec["counts"]["illegal"] == 3  # max_attempts exhausted
-    attempts = read_records(tmp_path / "lose.jsonl")[:-1]
+    attempts = [r for r in read_records(tmp_path / "lose.jsonl") if r["type"] == "attempt"]
     assert [a["attempt"] for a in attempts] == [1, 2, 3]
 
 
