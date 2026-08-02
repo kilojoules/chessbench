@@ -3,9 +3,11 @@ from __future__ import annotations
 import argparse
 import functools
 import json
+import queue
 import re
 import statistics
 import sys
+import threading
 import time
 import zlib
 from pathlib import Path
@@ -100,6 +102,7 @@ def make_llm(spec: GameSpec, args: argparse.Namespace):
         max_tokens=args.max_tokens,
         timeout=args.llm_timeout,
         seed=args.llm_seed,
+        num_ctx=args.num_ctx,
     )
 
 
@@ -147,6 +150,11 @@ def main(argv: list[str] | None = None) -> int:
                    help="sampling seed passed to providers that support it")
     p.add_argument("--llm-timeout", type=float, default=600.0,
                    help="per-request timeout in seconds; local thinking models can need minutes per move")
+    p.add_argument("--num-ctx", type=int, default=None,
+                   help="ollama context window (its 4096 default silently truncates long thinking; "
+                        "set >= prompt + max-tokens)")
+    p.add_argument("--parallel", type=int, default=1,
+                   help="concurrent games (needs OLLAMA_NUM_PARALLEL >= this for local models)")
     p.add_argument("--list", action="store_true", help="print the planned games and exit")
     args = p.parse_args(argv)
 
@@ -176,68 +184,95 @@ def main(argv: list[str] | None = None) -> int:
     engine_cfg = EngineConfig(path=args.stockfish, skill_level=args.skill, nodes=args.nodes,
                               eval_depth=args.eval_depth)
 
-    completed: list[dict] = []
-    with Engine(engine_cfg) as engine:
-        manifest = {
-            "argv": sys.argv[1:] if argv is None else argv,
-            "models": args.model,
-            "variants": variants,
-            "visibilities": visibilities,
-            "games_per_cell": args.games_per_cell,
-            "chess960_positions": positions,
-            "position_seed": args.position_seed,
-            "offbook_prefixes": [" ".join(p) for p in prefixes],
-            "prefix_plies": args.prefix_plies,
-            "prefix_seed": args.prefix_seed,
-            "engine": {"name": engine.name, "skill_level": args.skill, "nodes": args.nodes},
-            "max_plies": args.max_plies,
-            "max_attempts": args.max_attempts,
-            "temperature": args.temperature,
-            "max_tokens": args.max_tokens,
-            "llm_seed": args.llm_seed,
-            "prompt_version": PROMPT_VERSION,
-            "started_at": time.strftime("%Y-%m-%dT%H:%M:%S%z"),
-        }
-        stamp = time.strftime("%Y%m%d-%H%M%S")
-        (args.out / f"manifest-{stamp}.json").write_text(json.dumps(manifest, indent=2) + "\n")
+    with Engine(EngineConfig(path=args.stockfish, skill_level=args.skill,
+                             nodes=args.nodes, eval_depth=0)) as probe:
+        engine_name = probe.name
+    manifest = {
+        "argv": sys.argv[1:] if argv is None else argv,
+        "models": args.model,
+        "variants": variants,
+        "visibilities": visibilities,
+        "games_per_cell": args.games_per_cell,
+        "chess960_positions": positions,
+        "position_seed": args.position_seed,
+        "offbook_prefixes": [" ".join(p) for p in prefixes],
+        "prefix_plies": args.prefix_plies,
+        "prefix_seed": args.prefix_seed,
+        "engine": {"name": engine_name, "skill_level": args.skill, "nodes": args.nodes},
+        "max_plies": args.max_plies,
+        "max_attempts": args.max_attempts,
+        "temperature": args.temperature,
+        "max_tokens": args.max_tokens,
+        "llm_seed": args.llm_seed,
+        "num_ctx": args.num_ctx,
+        "parallel": args.parallel,
+        "prompt_version": PROMPT_VERSION,
+        "started_at": time.strftime("%Y-%m-%dT%H:%M:%S%z"),
+    }
+    stamp = time.strftime("%Y%m%d-%H%M%S")
+    (args.out / f"manifest-{stamp}.json").write_text(json.dumps(manifest, indent=2) + "\n")
 
-        n_skipped = 0
-        consecutive_errors = 0
-        for i, spec in enumerate(all_specs, 1):
-            path = args.out / f"{spec.game_id}.jsonl"
-            if game_done(path):
-                n_skipped += 1
-                continue
-            llm = make_llm(spec, args)
-            try:
-                rec = play_game(spec, llm, engine, args.out)
-            except KeyboardInterrupt:
-                raise
-            except Exception as e:
-                # One bad game must not kill a long run; its file stays
-                # incomplete, so a re-run resumes it. Repeated back-to-back
-                # failures mean something systemic (server down, bad key) —
-                # stop burning games.
-                consecutive_errors += 1
-                print(f"[{i}/{len(all_specs)}] {spec.game_id}: ERROR {type(e).__name__}: {e}")
-                if consecutive_errors >= 3:
-                    print("3 consecutive game errors — aborting; fix the cause and re-run to resume")
-                    return 1
-                continue
-            consecutive_errors = 0
-            completed.append(rec)
-            print(
-                f"[{i}/{len(all_specs)}] {spec.game_id}: {rec['llm_result']} "
-                f"({rec['termination']}, {rec['plies']} plies"
-                + (f", first event at ply {rec['first_event_ply']}" if rec["event"] else "")
-                + ")"
-            )
+    todo = [s for s in all_specs if not game_done(args.out / f"{s.game_id}.jsonl")]
+    n_skipped = len(all_specs) - len(todo)
+
+    completed: list[dict] = []
+    lock = threading.Lock()
+    stop = threading.Event()
+    state = {"done": 0, "consecutive_errors": 0}
+    work: queue.Queue = queue.Queue()
+    for s in todo:
+        work.put(s)
+
+    def worker() -> None:
+        # Each worker owns its Stockfish pair; game files are disjoint, so
+        # workers only share the progress lock and the error circuit breaker.
+        with Engine(engine_cfg) as engine:
+            while not stop.is_set():
+                try:
+                    spec = work.get_nowait()
+                except queue.Empty:
+                    return
+                llm = make_llm(spec, args)
+                try:
+                    rec = play_game(spec, llm, engine, args.out)
+                except Exception as e:
+                    # One bad game must not kill a long run; its file stays
+                    # incomplete, so a re-run resumes it. Repeated back-to-back
+                    # failures mean something systemic (server down, bad key) —
+                    # stop burning games.
+                    with lock:
+                        state["done"] += 1
+                        state["consecutive_errors"] += 1
+                        print(f"[{state['done']}/{len(todo)}] {spec.game_id}: "
+                              f"ERROR {type(e).__name__}: {e}")
+                        if state["consecutive_errors"] >= 3:
+                            print("3 consecutive game errors — aborting; "
+                                  "fix the cause and re-run to resume")
+                            stop.set()
+                    continue
+                with lock:
+                    state["done"] += 1
+                    state["consecutive_errors"] = 0
+                    completed.append(rec)
+                    print(
+                        f"[{state['done']}/{len(todo)}] {spec.game_id}: {rec['llm_result']} "
+                        f"({rec['termination']}, {rec['plies']} plies"
+                        + (f", first event at ply {rec['first_event_ply']}" if rec["event"] else "")
+                        + ")"
+                    )
+
+    n_workers = max(1, min(args.parallel, len(todo) or 1))
+    threads = [threading.Thread(target=worker, daemon=True) for _ in range(n_workers)]
+    for t in threads:
+        t.start()
+    for t in threads:
+        t.join()
 
     if n_skipped:
         print(f"\nskipped {n_skipped} already-completed games (resume)")
     if completed:
         summarize(completed)
-    return 0
+    return 1 if stop.is_set() else 0
 
 
 if __name__ == "__main__":

@@ -54,6 +54,9 @@ class LiteLLMClient:
         timeout: float = 600.0,  # local thinking models can take minutes/move
         num_retries: int = 2,
         seed: int | None = None,
+        num_ctx: int | None = None,  # ollama context window; its 4096 default
+                                     # silently context-shifts long thinking,
+                                     # dropping the system prompt mid-move
     ):
         self.model = model
         self.temperature = temperature
@@ -61,6 +64,7 @@ class LiteLLMClient:
         self.timeout = timeout
         self.num_retries = num_retries
         self.seed = seed
+        self.num_ctx = num_ctx
         self.effective_temperature = _probe_effective_temperature(model, temperature)
 
     def complete(self, messages: list[dict], board: chess.Board | None = None) -> LLMResponse:
@@ -73,6 +77,8 @@ class LiteLLMClient:
             kwargs["temperature"] = self.effective_temperature
         if self.seed is not None:
             kwargs["seed"] = self.seed
+        if self.num_ctx is not None:
+            kwargs["num_ctx"] = self.num_ctx  # ollama-only; dropped elsewhere
         t0 = time.monotonic()
         resp = litellm.completion(
             model=self.model,
