@@ -42,6 +42,10 @@ class GameSpec:
     # onto the board before the game loop; empty for other variants.
     opening_prefix: tuple[str, ...] = ()
     prefix_id: int | None = None  # index into the drawn prefix set
+    # Appends qwen-style "/no_think" to the system prompt, disabling hybrid
+    # thinking. A per-model operating parameter (recorded per game), not a
+    # benchmark condition change.
+    no_think: bool = False
     max_plies: int = 200
     max_attempts: int = 3  # attempts per ply before loss-by-illegality
     temperature: float = 0.0

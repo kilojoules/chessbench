@@ -341,6 +341,15 @@ writeup must be reported as such.
   ≥20 games/cell so every 960 position appears in both colors within
   each cell (unaliases color; the first 10/cell of data extend rather
   than restart, thanks to resumable game IDs).
+- **Amendment v1.1 (2026-08-01, before any outcome analysis):** thinking
+  mode proved infeasible at replicate scale on the local machine (median
+  7.3k thinking tokens/move ≈ 4 min/move at 31 tok/s; a 16k window causes
+  recurring GPU backend crashes at 2-way parallel, and an 8k budget
+  truncates 41% of attempts). The local pilot therefore runs qwen3:4b
+  with `/no_think` (recorded per game) as the PRIMARY arm, with thinking
+  mode as a smaller secondary arm (fewer games/cell, serial). This is an
+  operating-parameter change for feasibility, not a condition change; the
+  thinking-vs-no-thinking contrast becomes an explicit secondary axis.
 - Main run: ≥3 models spanning capability tiers, 30 games/cell.
   Conclusions stated per-model; no pooled "LLMs do X" claim without a
   heterogeneity analysis across models.

@@ -8,7 +8,7 @@ from chessbench.run import build_specs
 
 
 def _args():
-    return argparse.Namespace(max_plies=200, max_attempts=3, temperature=0.0)
+    return argparse.Namespace(max_plies=200, max_attempts=3, temperature=0.0, no_think=False)
 
 
 POSITIONS = draw_chess960_positions(10, 2026)

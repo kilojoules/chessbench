@@ -58,6 +58,7 @@ def system_prompt(spec: GameSpec) -> str:
         )
     else:
         variant_par = "This is a game of standard chess, played from the normal starting position."
+    no_think = "\n\n/no_think" if spec.no_think else ""
     return f"""You are playing a game of chess against an opponent. {variant_par}
 
 You are playing {color}.
@@ -69,7 +70,7 @@ Examples: "MOVE: e4", "MOVE: Nf3", "MOVE: O-O", "MOVE: exd8=Q+".
 
 If a move could be made by more than one of your pieces, disambiguate it with the originating file or rank (e.g. "MOVE: Nbd2", "MOVE: R1e2").
 
-Only legal moves are accepted."""
+Only legal moves are accepted.{no_think}"""
 
 
 def move_request(spec: GameSpec, board: chess.Board, start_fen: str, san_history: list[str]) -> str:

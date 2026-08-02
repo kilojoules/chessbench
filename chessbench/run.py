@@ -83,6 +83,7 @@ def build_specs(model: str, variants: list[str], visibilities: list[str], games_
                         game_index=i,
                         opening_prefix=prefix,
                         prefix_id=prefix_id,
+                        no_think=args.no_think,
                         max_plies=args.max_plies,
                         max_attempts=args.max_attempts,
                         temperature=args.temperature,
@@ -150,6 +151,8 @@ def main(argv: list[str] | None = None) -> int:
                    help="sampling seed passed to providers that support it")
     p.add_argument("--llm-timeout", type=float, default=600.0,
                    help="per-request timeout in seconds; local thinking models can need minutes per move")
+    p.add_argument("--no-think", action="store_true",
+                   help="append qwen-style /no_think to the system prompt (disables hybrid thinking)")
     p.add_argument("--num-ctx", type=int, default=None,
                    help="ollama context window (its 4096 default silently truncates long thinking; "
                         "set >= prompt + max-tokens)")
@@ -217,6 +220,7 @@ def main(argv: list[str] | None = None) -> int:
         "max_tokens": args.max_tokens,
         "llm_seed": args.llm_seed,
         "num_ctx": args.num_ctx,
+        "no_think": args.no_think,
         "parallel": args.parallel,
         "prompt_version": PROMPT_VERSION,
         "started_at": time.strftime("%Y-%m-%dT%H:%M:%S%z"),

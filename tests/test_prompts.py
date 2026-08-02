@@ -81,6 +81,15 @@ def test_system_prompt_mentions_variant_and_color():
     assert "MOVE:" in sp
 
 
+def test_no_think_flag_appends_soft_switch():
+    spec_on = make_spec()
+    spec_off = make_spec()
+    from dataclasses import replace
+    sp = system_prompt(replace(spec_on, no_think=True))
+    assert sp.rstrip().endswith("/no_think")
+    assert "/no_think" not in system_prompt(spec_off)
+
+
 def test_ascii_board_shape():
     art = ascii_board(chess.Board())
     lines = art.splitlines()

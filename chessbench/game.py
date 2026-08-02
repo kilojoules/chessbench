@@ -260,6 +260,7 @@ def play_game(spec: GameSpec, llm, engine, out_dir: Path) -> dict:
             "temperature": spec.temperature,
             "effective_temperature": getattr(llm, "effective_temperature", None),
             "num_ctx": getattr(llm, "num_ctx", None),
+            "no_think": spec.no_think,
             "prompt_version": PROMPT_VERSION,
             "parser_version": PARSER_VERSION,
             "engine_name": getattr(engine, "name", "unknown"),
