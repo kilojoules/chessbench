@@ -350,6 +350,19 @@ writeup must be reported as such.
   mode as a smaller secondary arm (fewer games/cell, serial). This is an
   operating-parameter change for feasibility, not a condition change; the
   thinking-vs-no-thinking contrast becomes an explicit secondary axis.
+- **Amendment v1.2 (2026-08-02, before any outcome analysis):** qwen3:4b
+  is disqualified as the local workhorse entirely: with thinking disabled
+  via the native ollama `think:false` (the `/no_think` prompt switch is
+  advisory and ignored for chess prompts), it still generates unboundedly
+  on hard positions — a 960-blindfold probe hit a 4096-token ceiling with
+  no move produced, and both no-think runs were fully truncation-censored
+  in the 960 cells. Its difficulty-dependent runaway generation is itself
+  a documented observation (token counts per cell are logged), but it
+  cannot produce uncensored replicates. The local pilot workhorse is now
+  **qwen2.5:3b** (natively non-thinking, ~5-token protocol-compliant
+  replies verified on the hardest cell), run at temperature 0.7 with the
+  full 3-variant × 2-visibility × 20-games/cell design. qwen3:4b thinking
+  mode remains a small secondary arm on capable hardware or API models.
 - Main run: ≥3 models spanning capability tiers, 30 games/cell.
   Conclusions stated per-model; no pooled "LLMs do X" claim without a
   heterogeneity analysis across models.
