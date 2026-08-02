@@ -14,6 +14,7 @@ dependencies = [
 chessbench = "chessbench.run:main"
 chessbench-viz = "chessbench.viz:main"
 chessbench-anim = "chessbench.animate:main"
+chessbench-analyze = "chessbench.analysis:main"
 
 [project.optional-dependencies]
 analysis = ["lifelines>=0.29", "pandas>=2", "matplotlib>=3.8"]

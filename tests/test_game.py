@@ -82,6 +82,7 @@ def test_retry_recovery_continues_game(tmp_path):
     assert rec["first_illegal_ply"] == 3
     assert rec["first_illegal_llm_move"] == 2
     assert rec["survival_plies"] == 3
+    assert rec["survival_llm_moves"] == 2
     assert rec["counts"]["illegal"] == 1
     # The failed ply has two attempts: illegal then legal.
     attempts = [r for r in read_records(tmp_path / "recover.jsonl") if r["type"] == "attempt"]
@@ -182,6 +183,35 @@ def test_truncation_is_not_a_chess_failure(tmp_path):
     truncs = [a for a in attempts if a["parse_class"] == "truncated"]
     assert [t["trunc_try"] for t in truncs] == [1, 2]
     assert all(t["finish_reason"] == "length" for t in truncs)
+
+
+def test_offbook_game_plays_prefix_first(tmp_path):
+    from chessbench.positions import draw_offbook_prefixes
+    from chessbench.prompts import move_request, system_prompt
+
+    prefix = tuple(draw_offbook_prefixes(1, 6, 2027)[0])
+    spec = make_spec("offbook", variant="standard-offbook", opening_prefix=prefix,
+                     prefix_id=0, max_plies=8)
+    rec = play_game(spec, FakeLLM(policy="random", seed=11), StubEngine(), tmp_path)
+    assert rec["prefix_plies"] == 6
+    assert rec["opening_prefix"] == " ".join(prefix)
+    assert rec["san_history"].startswith(" ".join(prefix))
+    # Exposure cap excludes the prefix: 8 playable plies after 6 prefix plies.
+    assert rec["plies"] == 14 or rec["termination"] != "move_cap"
+    records = read_records(tmp_path / "offbook.jsonl")
+    assert [r["move_san"] for r in records if r["type"] == "prefix_move"] == list(prefix)
+    # LLM exposure starts after the prefix; survival time scale unaffected.
+    first_attempt = next(r for r in records if r["type"] == "attempt")
+    assert first_attempt["ply"] == 7
+    assert first_attempt["llm_move_index"] == 1
+    # Prompts: prefix moves appear in history; system prompt explains the setup.
+    assert "randomized" in system_prompt(spec)
+    import chess as _c
+    board = _c.Board()
+    for san in prefix:
+        board.push_san(san)
+    prompt = move_request(spec, board, _c.STARTING_FEN, list(prefix))
+    assert prefix[0] in prompt
 
 
 def test_persistent_truncation_censors_not_loses(tmp_path):

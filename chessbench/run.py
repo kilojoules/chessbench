@@ -13,9 +13,10 @@ from .config import PROMPT_VERSION, STANDARD_SP_ID, VARIANTS, VISIBILITIES, Engi
 from .engine import Engine
 from .game import play_game
 from .llm import FakeLLM, LiteLLMClient
-from .positions import draw_chess960_positions
+from .positions import draw_chess960_positions, draw_offbook_prefixes
 
 VIS_SLUG = {"history-only": "blind", "history+board": "board"}
+VARIANT_SLUG = {"standard": "standard", "chess960": "chess960", "standard-offbook": "offbook"}
 
 
 def model_slug(model: str) -> str:
@@ -35,22 +36,34 @@ def game_done(path: Path) -> bool:
 
 
 def build_specs(model: str, variants: list[str], visibilities: list[str], games_per_cell: int,
-                positions: list[int], args: argparse.Namespace) -> list[GameSpec]:
+                positions: list[int], prefixes: list[list[str]],
+                args: argparse.Namespace) -> list[GameSpec]:
     slug = model_slug(model)
     specs = []
     for variant in variants:
         for visibility in visibilities:
             for i in range(games_per_cell):
+                prefix: tuple[str, ...] = ()
+                prefix_id = None
                 if variant == "standard":
                     sp_id = STANDARD_SP_ID
                     color = "white" if i % 2 == 0 else "black"
+                    unit = f"sp{sp_id:03d}"
+                elif variant == "standard-offbook":
+                    sp_id = STANDARD_SP_ID
+                    prefix_id = i % len(prefixes)
+                    prefix = tuple(prefixes[prefix_id])
+                    # Same cycle-offset decorrelation as chess960 positions.
+                    color = "white" if (i % len(prefixes) + i // len(prefixes)) % 2 == 0 else "black"
+                    unit = f"pfx{prefix_id:02d}"
                 else:
                     sp_id = positions[i % len(positions)]
                     # Offset color by the replicate cycle so it doesn't alias
                     # with position parity: every position gets both colors.
                     color = "white" if (i % len(positions) + i // len(positions)) % 2 == 0 else "black"
+                    unit = f"sp{sp_id:03d}"
                 game_id = (
-                    f"{slug}__{variant}__{VIS_SLUG[visibility]}__sp{sp_id:03d}__g{i:03d}__{color[0]}"
+                    f"{slug}__{VARIANT_SLUG[variant]}__{VIS_SLUG[visibility]}__{unit}__g{i:03d}__{color[0]}"
                 )
                 specs.append(
                     GameSpec(
@@ -61,6 +74,8 @@ def build_specs(model: str, variants: list[str], visibilities: list[str], games_
                         sp_id=sp_id,
                         llm_color=color,
                         game_index=i,
+                        opening_prefix=prefix,
+                        prefix_id=prefix_id,
                         max_plies=args.max_plies,
                         max_attempts=args.max_attempts,
                         temperature=args.temperature,
@@ -104,11 +119,14 @@ def main(argv: list[str] | None = None) -> int:
     )
     p.add_argument("--model", action="append", required=True,
                    help="litellm model string (e.g. anthropic/claude-sonnet-5) or fake:first|random|always-illegal; repeatable")
-    p.add_argument("--variant", choices=[*VARIANTS, "both"], default="both")
+    p.add_argument("--variant", choices=[*VARIANTS, "both", "all"], default="all",
+                   help="'both' = standard+chess960 (the original 2x2); 'all' adds standard-offbook")
     p.add_argument("--visibility", choices=[*VISIBILITIES, "both"], default="both")
     p.add_argument("--games-per-cell", type=int, default=30)
     p.add_argument("--n-positions", type=int, default=10, help="size of the fixed Chess960 start-position set")
     p.add_argument("--position-seed", type=int, default=2026)
+    p.add_argument("--prefix-plies", type=int, default=6, help="random opening length for standard-offbook")
+    p.add_argument("--prefix-seed", type=int, default=2027)
     p.add_argument("--out", type=Path, default=Path("runs/dev"))
     p.add_argument("--stockfish", default="stockfish")
     p.add_argument("--skill", type=int, default=3, help="Stockfish Skill Level (0-20)")
@@ -127,13 +145,21 @@ def main(argv: list[str] | None = None) -> int:
     p.add_argument("--list", action="store_true", help="print the planned games and exit")
     args = p.parse_args(argv)
 
-    variants = list(VARIANTS) if args.variant == "both" else [args.variant]
+    if args.variant == "all":
+        variants = list(VARIANTS)
+    elif args.variant == "both":
+        variants = ["standard", "chess960"]
+    else:
+        variants = [args.variant]
     visibilities = list(VISIBILITIES) if args.visibility == "both" else [args.visibility]
     positions = draw_chess960_positions(args.n_positions, args.position_seed)
+    prefixes = draw_offbook_prefixes(args.n_positions, args.prefix_plies, args.prefix_seed)
 
     all_specs = []
     for model in args.model:
-        all_specs.extend(build_specs(model, variants, visibilities, args.games_per_cell, positions, args))
+        all_specs.extend(
+            build_specs(model, variants, visibilities, args.games_per_cell, positions, prefixes, args)
+        )
 
     if args.list:
         for s in all_specs:
@@ -155,6 +181,9 @@ def main(argv: list[str] | None = None) -> int:
             "games_per_cell": args.games_per_cell,
             "chess960_positions": positions,
             "position_seed": args.position_seed,
+            "offbook_prefixes": [" ".join(p) for p in prefixes],
+            "prefix_plies": args.prefix_plies,
+            "prefix_seed": args.prefix_seed,
             "engine": {"name": engine.name, "skill_level": args.skill, "nodes": args.nodes},
             "max_plies": args.max_plies,
             "max_attempts": args.max_attempts,

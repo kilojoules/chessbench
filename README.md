@@ -1,12 +1,21 @@
 # chessbench
 
 Benchmark measuring **time-to-first-illegal-move** for LLMs playing chess
-against Stockfish, across a 2×2 design:
+against Stockfish, across a visibility × variant design:
 
 - **Board visibility:** `history-only` (blindfold: start FEN + SAN move list)
   vs `history+board` (plus current FEN and ASCII board each turn)
 - **Variant:** `standard` vs `chess960` (fixed seeded set of Fischer Random
-  start positions, paired across cells)
+  start positions, paired across cells) vs `standard-offbook` (standard
+  rules with a seeded random 6-ply opening — the bridge condition that
+  separates "off-book" from "off-geometry")
+
+The analysis is pre-registered (PLAN.md §7): survival analysis on the
+LLM-move-index scale, a cause-specific Cox model with the
+blindfold×chess960 interaction as the theory-laden prediction, and an
+illegal-move error taxonomy including the `phantom-standard` class (moves
+that would have been legal from the standard start — the signature of
+standard-geometry pattern matching).
 
 Full design rationale, prior-art survey, and analysis plan: [PLAN.md](PLAN.md).
 
@@ -58,6 +67,14 @@ uv run chessbench --model anthropic/claude-sonnet-5 --list
 
 # The real thing:
 uv run chessbench --model anthropic/claude-sonnet-5 --games-per-cell 30 --out runs/main
+
+# Pre-registered analysis (KM curves, hazard plot, Cox model, error taxonomy):
+uv sync --extra analysis
+uv run chessbench-analyze runs/main
+
+# Animations (GIF per game) and the interactive viewer:
+uv run chessbench-anim runs/main -o runs/main/anim
+uv run chessbench-viz runs/main
 ```
 
 Runs are resumable: a game whose JSONL already contains its final

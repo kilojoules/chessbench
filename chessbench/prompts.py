@@ -9,7 +9,7 @@ from .parsing import ParseResult
 def start_board(variant: str, sp_id: int) -> chess.Board:
     if variant == "chess960":
         return chess.Board.from_chess960_pos(sp_id)
-    return chess.Board()
+    return chess.Board()  # "standard" and "standard-offbook"
 
 
 def board_fen(board: chess.Board) -> str:
@@ -48,6 +48,13 @@ def system_prompt(spec: GameSpec) -> str:
             "Black); castling queenside puts your king on c1 and your rook on d1 (c8 and "
             "d8 for Black), regardless of where king and rook started. Write castling in "
             "SAN as O-O or O-O-O."
+        )
+    elif spec.variant == "standard-offbook":
+        variant_par = (
+            "This is a game of standard chess, played from the normal starting position. "
+            "The opening was randomized: the first few moves for BOTH sides were played by "
+            "a neutral random move generator (they appear in the move history), and the "
+            "game continues from the resulting position. All normal chess rules apply."
         )
     else:
         variant_par = "This is a game of standard chess, played from the normal starting position."

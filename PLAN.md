@@ -232,7 +232,11 @@ where possible for rough comparability.
 - **Color/position decorrelation:** naive `i % positions` + `i % 2` aliases
   color with position parity (each 960 position always the same color);
   color is offset by the replicate cycle instead, so every position sees
-  both colors and each cell stays 15/15.
+  both colors and each cell stays 15/15. **Caveat:** the offset only bites
+  from the second replicate cycle — at `games_per_cell ≤ n_positions` each
+  960 position still appears with exactly one color *within* a cell, so
+  color contrasts inside 960 cells need `games_per_cell ≥ 2 × n_positions`
+  (standard cells are always clean: one position, alternating colors).
 - **Canonical-SAN echo (deliberate, documented):** "Moves played so far"
   shows canonical SAN — including check marks and corrected disambiguation
   of the model's own moves (PGN convention, symmetric across cells). This
@@ -259,7 +263,105 @@ where possible for rough comparability.
   pure-"invalid" (format) forfeit is censoring, not a survival event, and
   must not be conflated with an illegal-move loss.
 
-## 7. Key references
+## 7. Pre-registration (v1, 2026-08-01 — frozen before the main run)
+
+Written after the qwen3:4b pilot and an adversarial design review, before any
+replicate data was analyzed. Deviations from this section in the eventual
+writeup must be reported as such.
+
+### Hypotheses
+
+- **H1 — color (equivalence claim).** The color hazard ratio (White vs
+  Black) lies within [0.67, 1.5] ("no more than a 50% hazard change").
+  Tested as equivalence (90% CI within the margin), NOT as failure to
+  reject a difference. Known threats to the "similar training data"
+  rationale, acknowledged in advance: Black always has one extra opponent
+  move in context; as Black, the weakened engine drags play off-book
+  faster, which predicts worse-for-Black in blindfold cells for reasons
+  unrelated to training-data volume. Color is a covariate in all models
+  regardless of H1's outcome.
+- **H2 — board visibility (two-sided).** Withholding the current board
+  changes the hazard; direction deliberately unspecified. Prior art
+  (completion-style blindfold strength; PGN2FEN; Silicon Gambit's
+  retracted comparison) makes "history-only is easier in-distribution"
+  a live possibility, and that outcome would be consistent with the
+  pattern-matching account, not a refutation of it.
+- **H3 — variant (directional).** Chess960 hazard > standard hazard.
+- **H4 — the theory-laden prediction: the interaction.** The
+  pattern-matching account predicts board visibility reduces hazard MORE
+  in Chess960 than in standard chess (in standard, the memorized move
+  stream substitutes for the board; in 960 there is no stream to match).
+  Operationalized as a positive coefficient on blindfold×chess960 in a
+  Cox model on the log-hazard scale. Additivity on log-hazard (hazards
+  multiply) is the null — "the 960+blindfold cell is worst" alone is NOT
+  evidence for the interaction, only for two main effects.
+
+### Primary outcome and model
+
+- **Event:** first illegal-or-ambiguous attempt (parser v3 lenient
+  extraction). Sensitivity analyses: (a) illegal-only events;
+  (b) strict-protocol extraction only.
+- **Time scale:** LLM move index (each model move = one trial of the
+  state-tracking machinery). Game ply as a secondary scale (it aliases
+  with color: Black's k-th move is ply 2k).
+- **Model:** cause-specific Cox proportional hazards. Covariates:
+  visibility, variant, visibility×variant, color; start position as a
+  frailty/cluster term; per-model analyses (model as stratum when
+  pooling). Competing risks handled as cause-specific hazards with
+  censoring events: natural game end, move cap, infra truncation
+  (`censored_infra`), format forfeit (all-`invalid` `llm_forfeit`).
+- **Secondary outcomes:** hazard-by-move curves per cell (the
+  discriminating shape: memorization predicts low early hazard in
+  standard rising out of book, high-from-move-1 in 960); KM medians;
+  illegal attempts per 100 moves; per-cell censoring rates *by cause*
+  (truncation and refusal rates are condition-correlated and must be
+  visible, not buried); refusal rate per cell; CPL trajectories (offline,
+  from PGNs).
+
+### Exclusions
+
+- `truncated` attempts are infrastructure, outside the taxonomy; they
+  never count as events or failures.
+- Refusals land as `invalid`; a forfeited game with no illegal/ambiguous
+  attempt is censored, never an event.
+
+### Sample plan
+
+- Local pilot: qwen3:4b, thinking mode, temperature 0.6 (Qwen's
+  recommended sampling; temp 0 causes documented repetition loops),
+  ≥20 games/cell so every 960 position appears in both colors within
+  each cell (unaliases color; the first 10/cell of data extend rather
+  than restart, thanks to resumable game IDs).
+- Main run: ≥3 models spanning capability tiers, 30 games/cell.
+  Conclusions stated per-model; no pooled "LLMs do X" claim without a
+  heterogeneity analysis across models.
+
+### Planned design additions before the main run
+
+1. **Bridge condition "standard-offbook":** standard rules and geometry,
+   with a seeded random prefix of k=6 legal plies prepended before the
+   model's first move (prefix excluded from survival exposure; same
+   prefixes across all models). Separates "off-book" from "off-geometry"
+   — if degradation tracks off-book, the memorization account gains;
+   if it needs 960 geometry, something else is going on.
+2. **Error taxonomy** of illegal attempts, annotated offline from logs:
+   piece-not-on-that-square / own-piece capture / illegal castling /
+   pinned-piece violation / phantom-standard-position move (a move only
+   sensible if the board were in its standard-chess configuration).
+   The *distribution* of error types across cells discriminates
+   pattern-matching from state-drift better than rates alone.
+3. **State probes** (separate arm, future work): side-queries at matched
+   plies ("what piece is on d4?", "is O-O legal?") that never enter the
+   game — measuring the mental model directly.
+
+### Acknowledged limitations
+
+Single engine configuration; Stockfish skill-level RNG is unseedable (the
+opponent is not bit-reproducible); one board representation (FEN + ASCII
+diagram) — a board-condition deficit must not be interpreted as evidence
+about state tracking without a FEN-only ablation; 10 fixed 960 positions.
+
+## 8. Key references
 
 - Acher illegal-move studies: https://blog.mathieuacher.com/GPTsChessEloRatingLegalMoves/
 - Karvonen chess_gpt_eval + world models: https://github.com/adamkarvonen/chess_gpt_eval , arXiv 2403.15498

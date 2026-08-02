@@ -63,14 +63,15 @@ def load_game(path: Path) -> dict | None:
                 pending_fails = []
             else:
                 pending_fails.append(fail_entry(r))
-        elif r["type"] == "engine_move":
+        elif r["type"] in ("engine_move", "prefix_move"):
             move = board.parse_uci(r["move_uci"])
             frm = chess.square_name(move.from_square)
             to = chess.square_name(move.to_square)
             san = r["move_san"]
             board.push(move)
+            by = "engine" if r["type"] == "engine_move" else "prefix"
             plies.append(
-                {"san": san, "by": "engine", "from": frm, "to": to, "fen": board.fen(), "fails": []}
+                {"san": san, "by": by, "from": frm, "to": to, "fen": board.fen(), "fails": []}
             )
 
     return {
@@ -232,7 +233,8 @@ function render() {
   if (idx === 0) info.textContent = "start position";
   else {
     const p = g.plies[idx - 1];
-    info.textContent = "ply " + idx + ": " + p.san + " (" + (p.by === "llm" ? g.model : "stockfish") + ")"
+    const who = p.by === "llm" ? g.model : (p.by === "prefix" ? "random opening" : "stockfish");
+    info.textContent = "ply " + idx + ": " + p.san + " (" + who + ")"
       + (p.eval != null ? " \\u00b7 eval " + (p.eval / 100).toFixed(2) : "");
   }
   renderFails();

@@ -147,7 +147,12 @@ def animate_game(game: dict, out_path: Path, square: int = 56,
             durations.append(fail_ms)
         num = (i + 1) // 2
         dots = "." if i % 2 == 1 else "…"
-        who = game["model"].split("/")[-1] if ply["by"] == "llm" else "stockfish"
+        if ply["by"] == "llm":
+            who = game["model"].split("/")[-1]
+        elif ply["by"] == "prefix":
+            who = "random opening"
+        else:
+            who = "stockfish"
         frames.append(rend.frame(ply["fen"], (ply["from"], ply["to"]), f"{num}{dots} {ply['san']}  ({who})"))
         durations.append(ply_ms)
         prev_fen = ply["fen"]

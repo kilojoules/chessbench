@@ -53,6 +53,25 @@ def play_game(spec: GameSpec, llm, engine, out_dir: Path) -> dict:
             f.write(json.dumps(rec, ensure_ascii=False) + "\n")
             f.flush()
 
+        # standard-offbook: play the seeded random prefix onto the board.
+        # These moves appear in the model's history but are nobody's play;
+        # LLM exposure (llm_move_index) starts after them.
+        for san in spec.opening_prefix:
+            move = board.parse_san(san)
+            emit(
+                {
+                    "type": "prefix_move",
+                    "game_id": spec.game_id,
+                    "ply": board.ply() + 1,
+                    "move_san": san,
+                    "move_uci": board.uci(move),
+                    "fen_before": board_fen(board),
+                    "ts": time.time(),
+                }
+            )
+            san_history.append(san)
+            board.push(move)
+
         while True:
             outcome = board.outcome(claim_draw=True)
             if outcome is not None:
@@ -62,7 +81,9 @@ def play_game(spec: GameSpec, llm, engine, out_dir: Path) -> dict:
                     llm_won = (outcome.winner == chess.WHITE) == llm_is_white
                     winner = "llm" if llm_won else "engine"
                 break
-            if board.ply() >= spec.max_plies:
+            # Cap counts played plies excluding the prefix, so offbook games
+            # get the same exposure window as the other variants.
+            if board.ply() - len(spec.opening_prefix) >= spec.max_plies:
                 termination = "move_cap"
                 break
 
@@ -227,6 +248,13 @@ def play_game(spec: GameSpec, llm, engine, out_dir: Path) -> dict:
             "first_failure_llm_move": first_failure[1] if first_failure else None,
             "event": event,
             "survival_plies": first_event[0] if event else board.ply(),
+            # Primary survival time scale per the pre-registration: LLM move
+            # index (each model move = one trial; unaffected by color or the
+            # offbook prefix, unlike ply).
+            "survival_llm_moves": first_event[1] if event else llm_move_index,
+            "prefix_plies": len(spec.opening_prefix),
+            "opening_prefix": " ".join(spec.opening_prefix) or None,
+            "prefix_id": spec.prefix_id,
             "forfeit_attempt_classes": forfeit_classes,
             "termination": termination,
             "winner": winner,
