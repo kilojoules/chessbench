@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import argparse
+import functools
 import json
 import re
 import statistics
@@ -17,6 +18,10 @@ from .positions import draw_chess960_positions, draw_offbook_prefixes
 
 VIS_SLUG = {"history-only": "blind", "history+board": "board"}
 VARIANT_SLUG = {"standard": "standard", "chess960": "chess960", "standard-offbook": "offbook"}
+
+# Progress lines must land in redirected logs immediately (long detached runs
+# are watched via `tail -f`); default block buffering hides them for hours.
+print = functools.partial(print, flush=True)
 
 
 def model_slug(model: str) -> str:
