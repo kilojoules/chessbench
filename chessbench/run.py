@@ -224,6 +224,24 @@ def main(argv: list[str] | None = None) -> int:
     stamp = time.strftime("%Y%m%d-%H%M%S")
     (args.out / f"manifest-{stamp}.json").write_text(json.dumps(manifest, indent=2) + "\n")
 
+    # Health probe: one trivial completion per real model BEFORE burning
+    # games — a dead server (e.g. crashed GPU backend) can answer 200s with
+    # empty bodies, which must never be graded as chess.
+    for model in args.model:
+        if model.startswith("fake:"):
+            continue
+        probe_llm = LiteLLMClient(model=model, temperature=args.temperature,
+                                  max_tokens=256, timeout=args.llm_timeout,
+                                  num_ctx=args.num_ctx)
+        try:
+            r = probe_llm.complete([{"role": "user", "content": "Reply with the single word: ready"}])
+        except Exception as e:
+            p.error(f"health probe failed for {model}: {type(e).__name__}: {e}")
+        if not r.text.strip() and not (r.output_tokens or 0):
+            p.error(f"health probe for {model} returned an empty zero-token response — "
+                    "the serving backend looks dead (restart it and re-run)")
+        print(f"[probe] {model} ok ({r.output_tokens} tokens, {r.latency_ms} ms)")
+
     todo = [s for s in all_specs if not game_done(args.out / f"{s.game_id}.jsonl")]
     n_skipped = len(all_specs) - len(todo)
 

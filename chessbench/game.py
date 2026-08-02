@@ -115,14 +115,19 @@ def play_game(spec: GameSpec, llm, engine, out_dir: Path) -> dict:
                 while attempt < spec.max_attempts:
                     request_prompt = messages[-1]["content"]  # move request or retry feedback
                     resp = llm.complete(messages, board=board)
-                    truncated = resp.finish_reason == "length" or resp.context_overflow
+                    # Zero-token empty responses are a dead/dying server (e.g.
+                    # a crashed GPU backend answering 200s), not model output.
+                    empty = not resp.text.strip() and not (resp.output_tokens or 0) \
+                        and not (resp.reasoning or "").strip()
+                    truncated = resp.finish_reason == "length" or resp.context_overflow or empty
                     if truncated:
                         trunc_tries += 1
-                        reason = (
-                            "context overflow (prompt+output exceeded num_ctx)"
-                            if resp.context_overflow
-                            else "response truncated (finish_reason=length)"
-                        )
+                        if empty:
+                            reason = "empty response (0 output tokens — server failure?)"
+                        elif resp.context_overflow:
+                            reason = "context overflow (prompt+output exceeded num_ctx)"
+                        else:
+                            reason = "response truncated (finish_reason=length)"
                         pr = ParseResult("truncated", None, None, None, None, reason)
                     else:
                         attempt += 1
@@ -173,6 +178,16 @@ def play_game(spec: GameSpec, llm, engine, out_dir: Path) -> dict:
                     )
                     if truncated:
                         if trunc_tries > MAX_TRUNCATION_RETRIES:
+                            if empty:
+                                # Persistent emptiness = the server is down.
+                                # Raise so the game stays INCOMPLETE (resume
+                                # replays it) and the run-level circuit
+                                # breaker can stop the run — a completed
+                                # "censored" record here would be poison.
+                                raise RuntimeError(
+                                    "LLM returned persistent empty responses "
+                                    "(0 output tokens) — server failure suspected"
+                                )
                             infra_truncated = True
                             break
                         continue  # re-request; no feedback, no chess attempt consumed

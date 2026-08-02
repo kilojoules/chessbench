@@ -268,6 +268,43 @@ def test_persistent_overflow_censors(tmp_path):
     assert rec["llm_result"] == "censored_infra"
 
 
+class DeadServerLLM:
+    """Simulates a crashed backend: instant empty zero-token 200s."""
+
+    def complete(self, messages, board=None):
+        return LLMResponse("", 0, 0, 240, finish_reason="stop")
+
+
+def test_dead_server_raises_and_leaves_game_incomplete(tmp_path):
+    spec = make_spec("dead")
+    with pytest.raises(RuntimeError, match="empty responses"):
+        play_game(spec, DeadServerLLM(), StubEngine(), tmp_path)
+    # No completion record: resume must replay this game.
+    recs = read_records(tmp_path / "dead.jsonl")
+    assert all(r["type"] != "game" for r in recs)
+    from chessbench.run import game_done
+    assert not game_done(tmp_path / "dead.jsonl")
+
+
+def test_single_empty_response_recovers(tmp_path):
+    class FlakyLLM:
+        def __init__(self):
+            self.first = True
+
+        def complete(self, messages, board=None):
+            if self.first:
+                self.first = False
+                return LLMResponse("", 0, 0, 240, finish_reason="stop")
+            san = sorted(board.san(m) for m in board.legal_moves)[0]
+            return LLMResponse(f"MOVE: {san}", 5, 5, 100, finish_reason="stop")
+
+    spec = make_spec("flaky", max_plies=4)
+    rec = play_game(spec, FlakyLLM(), StubEngine(), tmp_path)
+    assert rec["termination"] == "move_cap"
+    assert rec["counts"]["truncated"] == 1
+    assert rec["counts"]["invalid"] == 0
+
+
 def test_persistent_truncation_censors_not_loses(tmp_path):
     spec = make_spec("trunc-bad")
     rec = play_game(spec, TruncatingLLM(99), StubEngine(), tmp_path)
