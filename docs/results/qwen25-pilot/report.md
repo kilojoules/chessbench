@@ -16,6 +16,10 @@ Pre-registered analysis per PLAN.md §7 (time scale: LLM move index; event: firs
 | standard-offbook × history+board | 20 | 20 | 1 | 1 |
 | standard-offbook × history-only | 20 | 19 | 1 | 1 |
 
+![Every game](games.png)
+
+![Effects and mechanisms](effects.png)
+
 ![Kaplan-Meier](km.png)
 
 ![Discrete hazard](hazard.png)

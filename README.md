@@ -33,7 +33,9 @@ direct signature of pattern-matching on standard-chess geometry.
 
 ### qwen2.5:7b — the first tier with real separation
 
-![Kaplan-Meier curves, qwen2.5:7b](docs/results/qwen25-7b-pilot/km.png)
+![Every game, qwen2.5:7b](docs/results/qwen25-7b-pilot/games.png)
+
+![Effects and mechanisms, qwen2.5:7b](docs/results/qwen25-7b-pilot/effects.png)
 
 | Pre-registered test | Result |
 |---|---|

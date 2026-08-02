@@ -179,6 +179,128 @@ def km_plot(df, out_path: Path) -> None:
     plt.close(fig)
 
 
+def games_raster(df, out_path: Path) -> None:
+    """Every game as a row: exposure bar to first event (dot) or censoring
+    (open arrow), grouped by cell, sorted by survival. Honest about the
+    tiny discrete time scale in a way step curves are not."""
+    import matplotlib
+    matplotlib.use("Agg")
+    import matplotlib.pyplot as plt
+
+    cells = sorted(df["cell"].unique())
+    fig, ax = plt.subplots(figsize=(7.5, 8.5), dpi=200)
+    y = 0
+    yticks, ylabels = [], []
+    for cell in cells:
+        sub = df[df["cell"] == cell].sort_values(["T", "E"], ascending=[False, True])
+        variant, visibility = sub.iloc[0]["variant"], sub.iloc[0]["visibility"]
+        color = VARIANT_COLOR.get(variant, INK_2)
+        y_start = y
+        for _, r in sub.iterrows():
+            ax.hlines(y, 0, r["T"], color=color, linewidth=2,
+                      alpha=0.45 if visibility == "history-only" else 0.85)
+            if r["E"]:
+                ax.plot(r["T"], y, "o", color=color, markersize=3.5)
+            else:
+                ax.plot(r["T"], y, ">", color=color, markersize=4,
+                        markerfacecolor="none")
+            y += 1
+        yticks.append((y_start + y - 1) / 2)
+        ylabels.append(cell.replace(" × history+board", " · board")
+                       .replace(" × history-only", " · blind"))
+        y += 3  # gap between cells
+    ax.set_yticks(yticks)
+    ax.set_yticklabels(ylabels, fontsize=8, color=INK)
+    ax.invert_yaxis()
+    _style_ax(ax, "Every game: exposure until first illegal/ambiguous attempt",
+              "LLM move index (dot = event, open arrow = censored)", "")
+    ax.grid(axis="x", color=GRID, linewidth=0.6)
+    ax.grid(axis="y", visible=False)
+    fig.tight_layout()
+    fig.savefig(out_path)
+    plt.close(fig)
+
+
+def effects_figure(summary, illegals: list[dict], out_path: Path) -> None:
+    """Left: forest plot of the pre-registered Cox effects (log-HR scale,
+    H1 equivalence band). Right: mechanism-rate dumbbells (stale-state and
+    phantom-standard shares of illegal attempts, board -> blindfold)."""
+    import matplotlib
+    matplotlib.use("Agg")
+    import matplotlib.pyplot as plt
+    import numpy as np
+
+    fig, (axf, axm) = plt.subplots(1, 2, figsize=(9.5, 4.6), dpi=200,
+                                   gridspec_kw={"width_ratios": [1.1, 1.0]})
+
+    # --- forest ---
+    if summary is not None:
+        label_map = {
+            "blind": "blindfold", "v960": "chess960", "voffbook": "offbook",
+            "blind_x_960": "blindfold × 960", "blind_x_offbook": "blindfold × offbook",
+            "black": "plays Black",
+        }
+        names = [n for n in label_map if n in summary.index]
+        ys = np.arange(len(names))[::-1]
+        axf.axvspan(np.log(EQUIV_MARGIN[0]), np.log(EQUIV_MARGIN[1]),
+                    color=GRID, alpha=0.5, zorder=0)
+        axf.axvline(0, color=INK_2, linewidth=0.8)
+        for yi, n in zip(ys, names):
+            row = summary.loc[n]
+            lo, hi = row.get("coef lower 90%"), row.get("coef upper 90%")
+            sig = lo is not None and (lo > 0 or hi < 0)
+            axf.plot([lo, hi], [yi, yi], color=INK, linewidth=1.6)
+            axf.plot(row["coef"], yi, "o", color=INK, markersize=6,
+                     markerfacecolor=INK if sig else SURFACE)
+        axf.set_yticks(ys)
+        axf.set_yticklabels([label_map[n] for n in names], fontsize=9, color=INK)
+        ticks = [0.25, 0.5, 1, 2, 4, 8]
+        axf.set_xticks([np.log(t) for t in ticks])
+        axf.set_xticklabels([str(t) for t in ticks])
+        _style_ax(axf, "Hazard ratios (90% CI; filled = significant)",
+                  "hazard ratio (log scale) — right of 1 = fails sooner", "")
+        axf.text(np.log(EQUIV_MARGIN[1]), ys[-1] - 0.65, "H1 equivalence margin",
+                 fontsize=7, color=INK_2, ha="right")
+    else:
+        axf.text(0.5, 0.5, "no Cox fit", ha="center", color=INK_2)
+
+    # --- mechanism dumbbells ---
+    rows = []  # (label, variant, rate_board, rate_blind)
+    for metric, fn, variants in (
+        ("stale-state", stale_state, ("standard", "chess960", "standard-offbook")),
+        ("phantom-standard", None, ("chess960",)),
+    ):
+        for variant in variants:
+            rates = {}
+            for vis in ("history+board", "history-only"):
+                pool = [a for a in illegals if a["variant"] == variant and a["visibility"] == vis]
+                if not pool:
+                    continue
+                if metric == "stale-state":
+                    hits = sum(stale_state(a) for a in pool)
+                else:
+                    hits = sum(phantom_standard(a["history"], a["candidate"]) for a in pool)
+                rates[vis] = hits / len(pool)
+            if len(rates) == 2:
+                short = {"standard": "standard", "chess960": "960", "standard-offbook": "offbook"}[variant]
+                rows.append((f"{metric}\n({short})", variant,
+                             rates["history+board"], rates["history-only"]))
+    ys = np.arange(len(rows))[::-1]
+    for yi, (label, variant, rb, rbl) in zip(ys, rows):
+        color = VARIANT_COLOR.get(variant, INK_2)
+        axm.plot([rb, rbl], [yi, yi], color=color, linewidth=1.6, zorder=1)
+        axm.plot(rb, yi, "o", color=color, markersize=7, zorder=2)
+        axm.plot(rbl, yi, "o", color=color, markersize=7, markerfacecolor=SURFACE, zorder=2)
+    axm.set_yticks(ys)
+    axm.set_yticklabels([r[0] for r in rows], fontsize=8.5, color=INK)
+    axm.xaxis.set_major_formatter(lambda x, _: f"{x:.0%}")
+    _style_ax(axm, "Mechanism rates among illegal attempts\n(filled = board shown, open = blindfold)",
+              "share of illegal attempts", "")
+    fig.tight_layout()
+    fig.savefig(out_path)
+    plt.close(fig)
+
+
 def hazard_plot(df, out_path: Path) -> None:
     import matplotlib
     matplotlib.use("Agg")
@@ -360,8 +482,10 @@ def write_report(df, df_illonly, games: list[dict], illegals: list[dict],
     out_dir.mkdir(parents=True, exist_ok=True)
     km_plot(df, out_dir / "km.png")
     hazard_plot(df, out_dir / "hazard.png")
+    games_raster(df, out_dir / "games.png")
 
     summary, cox_note = cox_fit(df)
+    effects_figure(summary, illegals, out_dir / "effects.png")
     parts: list[str] = []
     parts.append("# chessbench analysis\n")
     parts.append(f"Runs: {', '.join(str(r) for r in run_dirs)}  ")
@@ -379,7 +503,8 @@ def write_report(df, df_illonly, games: list[dict], illegals: list[dict],
                      f"{sub['T'].median():.0f}"])
     parts.append("## Per-cell summary\n")
     parts.append(_md_table(["cell", "games", "events", "median event move", "median exposure"], rows))
-    parts.append("\n![Kaplan-Meier](km.png)\n\n![Discrete hazard](hazard.png)\n")
+    parts.append("\n![Every game](games.png)\n\n![Effects and mechanisms](effects.png)\n\n"
+                 "![Kaplan-Meier](km.png)\n\n![Discrete hazard](hazard.png)\n")
 
     # Cox
     parts.append("## Cox model (cause-specific, cluster-robust by position/prefix)\n")
