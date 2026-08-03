@@ -85,7 +85,7 @@ _No context-overflow attempts detected._
 | standard-offbook × history+board | 0 | 56 | 0 | 4 | 16 | 82 |
 | standard-offbook × history-only | 0 | 28 | 0 | 2 | 20 | 73 |
 
-_`(phantom-standard)` counts chess960 illegal attempts that would have been LEGAL replaying the same movetext from the standard start — the direct signature of standard-geometry pattern matching. `(stale-state)` counts attempts legal at a position 1–6 plies earlier — state-tracking lag; in board-shown cells these contradict the very board displayed in the prompt._
+_`(phantom-standard)` counts chess960 illegal attempts that would have been LEGAL replaying the same movetext from the standard start — the direct signature of standard-geometry pattern matching. It is a conservative lower bound (the full history must replay from the standard array, so detection is biased toward the opening) and a structural zero outside chess960 (the reconstruction equals reality there), which makes the non-960 rows a built-in control. Both parenthesized classes are overlays on the base classes, so columns do not sum. `(stale-state)` counts attempts legal at a position 1–6 plies earlier — state-tracking lag; in board-shown cells these contradict the very board displayed in the prompt._
 
 ## Sensitivity: illegal-only events
 

@@ -510,8 +510,27 @@ def classify_illegal(fen_before: str, candidate: str | None, chess960: bool) -> 
 
 def phantom_standard(history: list[str], candidate: str | None) -> bool:
     """Would the candidate be LEGAL if the same movetext had been played from
-    the STANDARD start? (Only meaningful for chess960 games — a True here is
-    the signature of pattern-matching on standard-chess geometry.)"""
+    the STANDARD start? A True is the signature of pattern-matching on
+    standard-chess geometry: the model played the board that isn't there.
+
+    Precise semantics: reconstruct the counterfactual position by replaying
+    the game's full SAN history from the standard starting array; the
+    attempt is phantom iff the replay succeeds (every played move is also
+    legal from the standard start) AND the candidate parses as fully legal
+    and unambiguous there. Any failure anywhere returns False.
+
+    Interpretation notes (see README "The phantom-standard detector,
+    precisely"):
+    - CONSERVATIVE lower bound: once one real 960 move is impossible from
+      the standard array, the replay breaks and no later attempt in that
+      game can be flagged — detection is biased toward the opening.
+    - STRUCTURAL ZERO outside chess960: for standard/offbook games the
+      reconstruction equals reality, so an illegal move stays illegal and
+      the detector cannot false-positive; the zero rows are the control.
+    - OVERLAY: a phantom attempt also carries its base mechanism class, so
+      taxonomy columns do not sum.
+    - Tests exactly ONE counterfactual (the standard start); other
+      hallucinated boards land in stale-state or piece-cannot-reach."""
     board = chess.Board()
     try:
         for san in history:
@@ -669,7 +688,12 @@ def write_report(df, df_illonly, games: list[dict], illegals: list[dict],
         parts.append(_md_table(["cell"] + classes, rows))
         parts.append("\n_`(phantom-standard)` counts chess960 illegal attempts that would "
                      "have been LEGAL replaying the same movetext from the standard start — "
-                     "the direct signature of standard-geometry pattern matching. "
+                     "the direct signature of standard-geometry pattern matching. It is a "
+                     "conservative lower bound (the full history must replay from the standard "
+                     "array, so detection is biased toward the opening) and a structural zero "
+                     "outside chess960 (the reconstruction equals reality there), which makes "
+                     "the non-960 rows a built-in control. Both parenthesized classes are "
+                     "overlays on the base classes, so columns do not sum. "
                      "`(stale-state)` counts attempts legal at a position 1–6 plies earlier — "
                      "state-tracking lag; in board-shown cells these contradict the very board "
                      "displayed in the prompt._\n")

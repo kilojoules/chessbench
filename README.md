@@ -40,6 +40,44 @@ the `phantom-standard` class: a move that would have been *legal* if the
 same movetext had been played from the standard starting position — the
 direct signature of pattern-matching on standard-chess geometry.
 
+#### The phantom-standard detector, precisely
+
+For an `illegal`-class attempt (well-formed SAN, illegal in the real
+position) in a chess960 game, the detector reconstructs the counterfactual
+board the model would believe in *if it thought the game had started from
+the normal position*: replay the game's full SAN history from the standard
+starting array. The attempt is phantom-standard **iff (a) every previously
+played move is also legal from the standard start (the replay succeeds) and
+(b) the attempted move is fully legal and unambiguous in that reconstructed
+position.** Example: in a start with knights on b1/f1, move one `Nf3` is
+illegal in reality but is the most-played move from the standard start —
+phantom.
+
+Four properties matter for interpretation:
+
+1. **Conservative lower bound.** The whole-history-must-replay requirement
+   makes detection easiest early and strictly harder as real 960 moves
+   accumulate that are impossible from the standard array; once the replay
+   breaks, later attempts in that game can never be flagged. Phantom counts
+   therefore *under*-state standard-board hallucination, with detection
+   biased toward the opening.
+2. **Structural zeros are the built-in control.** In standard and offbook
+   games, replaying the history from the standard start reconstructs the
+   *actual* position, so an illegal move stays illegal and the detector
+   cannot fire — by construction. The exact zeros in those cells double as
+   proof that the chess960 counts aren't artifacts of the method.
+3. **Overlay, not partition.** A phantom attempt also carries its base
+   mechanism class (typically `piece-cannot-reach`), so taxonomy columns
+   don't sum to the illegal-attempt total.
+4. **One counterfactual, not all of them.** The detector tests only the
+   hypothesis "the model believes the standard start." Hallucinations of
+   *other* wrong boards (stale positions, hybrids) are invisible to it and
+   surface instead in the `stale-state` overlay or the residual
+   `piece-cannot-reach` mass.
+
+Implementation: `phantom_standard()` in
+[`chessbench/analysis.py`](chessbench/analysis.py) — about ten lines.
+
 ### What the model actually sees
 
 Every prompt is logged verbatim in the game records; these are real examples

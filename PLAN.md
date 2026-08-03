@@ -395,6 +395,14 @@ writeup must be reported as such.
    sensible if the board were in its standard-chess configuration).
    The *distribution* of error types across cells discriminates
    pattern-matching from state-drift better than rates alone.
+   Phantom-standard is operationalized as: replay the game's full SAN
+   history from the standard starting array; the attempt is phantom iff
+   the replay succeeds and the candidate is fully legal and unambiguous
+   in the reconstruction. This is a conservative (opening-biased) lower
+   bound, a structural zero outside chess960 (built-in control), and an
+   overlay on the base classes — see README "The phantom-standard
+   detector, precisely" and `phantom_standard()` in
+   `chessbench/analysis.py`.
 3. **State probes** (separate arm, future work): side-queries at matched
    plies ("what piece is on d4?", "is O-O legal?") that never enter the
    game — measuring the mental model directly.
