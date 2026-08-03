@@ -284,81 +284,106 @@ def means_plot(df, out_path: Path) -> None:
 
 
 def effects_figure(summary, illegals: list[dict], out_path: Path) -> None:
-    """Left: forest plot of the pre-registered Cox effects (log-HR scale,
-    H1 equivalence band). Right: mechanism-rate dumbbells (stale-state and
-    phantom-standard shares of illegal attempts, board -> blindfold)."""
+    """One figure, two panels, one visual grammar. Panel A: WHEN it fails
+    (Cox hazard ratios). Panel B: HOW it fails (mechanism rates). Encodings
+    mean exactly one thing everywhere: fill = board visibility (filled =
+    board shown, open = blindfold), hue = variant identity. Panel A rows are
+    model coefficients, not cells, so they use a different mark (small solid
+    squares); significance is carried by position vs HR=1, with clearing
+    intervals inked darker than straddling ones."""
     import matplotlib
     matplotlib.use("Agg")
     import matplotlib.pyplot as plt
+    from matplotlib.patches import Rectangle
     import numpy as np
 
-    fig, (axf, axm) = plt.subplots(1, 2, figsize=(9.5, 4.6), dpi=200,
-                                   gridspec_kw={"width_ratios": [1.1, 1.0]})
+    fig, (axf, axm) = plt.subplots(1, 2, figsize=(10.5, 4.8), dpi=200,
+                                   gridspec_kw={"width_ratios": [1.05, 1.0]})
 
-    # --- forest ---
+    # ---------------- Panel A: when it fails ----------------
+    ROWS = [
+        ("v960", "chess960 (H3)", VARIANT_COLOR["chess960"]),
+        ("voffbook", "offbook", VARIANT_COLOR["standard-offbook"]),
+        ("blind", "blindfold (H2)", INK),
+        ("blind_x_960", "blindfold \u00d7 960 (H4)", VARIANT_COLOR["chess960"]),
+        ("blind_x_offbook", "blindfold \u00d7 offbook", VARIANT_COLOR["standard-offbook"]),
+        ("black", "plays Black (H1)", INK),
+    ]
     if summary is not None:
-        label_map = {
-            "blind": "blindfold", "v960": "chess960", "voffbook": "offbook",
-            "blind_x_960": "blindfold × 960", "blind_x_offbook": "blindfold × offbook",
-            "black": "plays Black",
-        }
-        names = [n for n in label_map if n in summary.index]
-        ys = np.arange(len(names))[::-1]
-        axf.axvspan(np.log(EQUIV_MARGIN[0]), np.log(EQUIV_MARGIN[1]),
-                    color=GRID, alpha=0.5, zorder=0)
-        axf.axvline(0, color=INK_2, linewidth=0.8)
-        for yi, n in zip(ys, names):
-            row = summary.loc[n]
-            lo, hi = row.get("coef lower 90%"), row.get("coef upper 90%")
+        rows = [(n, lab, c) for n, lab, c in ROWS if n in summary.index]
+        ys = np.arange(len(rows))[::-1]
+        for yi, (name, lab, color) in zip(ys, rows):
+            r = summary.loc[name]
+            lo, hi = r.get("coef lower 90%"), r.get("coef upper 90%")
             sig = lo is not None and (lo > 0 or hi < 0)
-            axf.plot([lo, hi], [yi, yi], color=INK, linewidth=1.6)
-            axf.plot(row["coef"], yi, "o", color=INK, markersize=6,
-                     markerfacecolor=INK if sig else SURFACE)
+            axf.plot([lo, hi], [yi, yi], color=color, solid_capstyle="butt",
+                     linewidth=2.4 if sig else 1.8, alpha=1.0 if sig else 0.38)
+            axf.plot(r["coef"], yi, "s", color=color, markersize=5, zorder=3)
+            if name == "black":
+                # The equivalence band belongs to this test alone: a small
+                # labeled strip behind the plays-Black row.
+                axf.add_patch(Rectangle((np.log(EQUIV_MARGIN[0]), yi - 0.38),
+                                        np.log(EQUIV_MARGIN[1]) - np.log(EQUIV_MARGIN[0]),
+                                        0.76, facecolor=GRID, edgecolor="none", zorder=0))
+                axf.text(np.log(EQUIV_MARGIN[1]) + 0.06, yi, "H1 margin",
+                         fontsize=6.8, color=INK_2, va="center")
+        axf.axvline(0, color=INK_2, linewidth=0.8)
         axf.set_yticks(ys)
-        axf.set_yticklabels([label_map[n] for n in names], fontsize=9, color=INK)
+        axf.set_yticklabels([lab for _, lab, _ in rows], fontsize=9, color=INK)
         ticks = [0.25, 0.5, 1, 2, 4, 8]
         axf.set_xticks([np.log(t) for t in ticks])
         axf.set_xticklabels([str(t) for t in ticks])
-        _style_ax(axf, "Hazard ratios (90% CI; filled = significant)",
-                  "hazard ratio (log scale) — right of 1 = fails sooner", "")
-        axf.text(np.log(EQUIV_MARGIN[1]), ys[-1] - 0.65, "H1 equivalence margin",
-                 fontsize=7, color=INK_2, ha="right")
+        _style_ax(axf, "When it fails \u2014 hazard ratios (90% CI; darker = clears 1)",
+                  "hazard ratio (log scale) \u2014 right of 1 = fails sooner", "")
     else:
         axf.text(0.5, 0.5, "no Cox fit", ha="center", color=INK_2)
 
-    # --- mechanism dumbbells ---
-    rows = []  # (label, variant, rate_board, rate_blind)
-    for metric, fn, variants in (
-        ("stale-state", stale_state, ("standard", "chess960", "standard-offbook")),
-        ("phantom-standard", None, ("chess960",)),
-    ):
-        for variant in variants:
-            rates = {}
-            for vis in ("history+board", "history-only"):
-                pool = [a for a in illegals if a["variant"] == variant and a["visibility"] == vis]
-                if not pool:
-                    continue
-                if metric == "stale-state":
-                    hits = sum(stale_state(a) for a in pool)
-                else:
-                    hits = sum(phantom_standard(a["history"], a["candidate"]) for a in pool)
-                rates[vis] = hits / len(pool)
-            if len(rates) == 2:
-                short = {"standard": "standard", "chess960": "960", "standard-offbook": "offbook"}[variant]
-                rows.append((f"{metric}\n({short})", variant,
-                             rates["history+board"], rates["history-only"]))
-    ys = np.arange(len(rows))[::-1]
-    for yi, (label, variant, rb, rbl) in zip(ys, rows):
-        color = VARIANT_COLOR.get(variant, INK_2)
-        axm.plot([rb, rbl], [yi, yi], color=color, linewidth=1.6, zorder=1)
+    # ---------------- Panel B: how it fails ----------------
+    ORDER = ["standard", "standard-offbook", "chess960"]
+    SHORT = {"standard": "standard", "standard-offbook": "offbook", "chess960": "chess960"}
+
+    def cell_stats(metric, variant, vis):
+        pool = [a for a in illegals if a["variant"] == variant and a["visibility"] == vis]
+        if not pool:
+            return None, 0, 0
+        if metric == "stale-state":
+            hits = sum(stale_state(a) for a in pool)
+        else:
+            hits = sum(phantom_standard(a["history"], a["candidate"]) for a in pool)
+        return hits / len(pool), hits, len(pool)
+
+    rows_b = [("stale-state", v) for v in ORDER] + [("phantom-standard", v) for v in ORDER]
+    ys = np.arange(len(rows_b))[::-1]
+    labels_b = []
+    for yi, (metric, variant) in zip(ys, rows_b):
+        color = VARIANT_COLOR[variant]
+        rb, hb, nb = cell_stats(metric, variant, "history+board")
+        rl, hl_, nl = cell_stats(metric, variant, "history-only")
+        labels_b.append(f"{metric}\n{SHORT[variant]}")
+        if rb is None or rl is None:
+            continue
+        axm.plot([rb, rl], [yi, yi], color=color, linewidth=1.6, zorder=1)
         axm.plot(rb, yi, "o", color=color, markersize=7, zorder=2)
-        axm.plot(rbl, yi, "o", color=color, markersize=7, markerfacecolor=SURFACE, zorder=2)
+        axm.plot(rl, yi, "o", color=color, markersize=7, markerfacecolor=SURFACE, zorder=2)
+        if metric == "phantom-standard":
+            # Counts on the dots that matter \u2014 including the structural zeros,
+            # so "phantoms exist only in chess960" is drawn, not implied.
+            if hb == 0 and hl_ == 0:
+                axm.text(0.035, yi, "0", fontsize=7.5, color=INK_2, va="center")
+            else:
+                axm.text(rb, yi + 0.32, str(hb), fontsize=7.5, color=INK, ha="center")
+                axm.text(rl, yi + 0.32, str(hl_), fontsize=7.5, color=INK, ha="center")
     axm.set_yticks(ys)
-    axm.set_yticklabels([r[0] for r in rows], fontsize=8.5, color=INK)
+    axm.set_yticklabels(labels_b, fontsize=8.5, color=INK)
+    axm.set_xlim(-0.03, None)
     axm.xaxis.set_major_formatter(lambda x, _: f"{x:.0%}")
-    _style_ax(axm, "Mechanism rates among illegal attempts\n(filled = board shown, open = blindfold)",
-              "share of illegal attempts", "")
-    fig.tight_layout()
+    _style_ax(axm, "How it fails \u2014 mechanism rates\n(filled = board shown, open = blindfold)",
+              "share of that cell's illegal attempts", "")
+    fig.text(0.005, 0.005,
+             "stale-state = the attempt was legal 1\u20136 plies earlier; phantom-standard = legal replaying "
+             "the same moves from the standard start (structurally 0 outside chess960).",
+             fontsize=6.8, color=INK_2)
+    fig.tight_layout(rect=(0, 0.03, 1, 1))
     fig.savefig(out_path)
     plt.close(fig)
 

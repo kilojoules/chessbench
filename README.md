@@ -100,7 +100,7 @@ never leaks board state into the blindfold cells.
 
 ![Every game, qwen2.5:7b](docs/results/qwen25-7b-pilot/games.png)
 
-![Mean moves to first illegal attempt, qwen2.5:7b](docs/results/qwen25-7b-pilot/means.png)
+![When and how it fails, qwen2.5:7b](docs/results/qwen25-7b-pilot/effects.png)
 
 #### How to read the numbers
 
