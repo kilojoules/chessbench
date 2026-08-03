@@ -161,21 +161,13 @@ chess960 cells. Report:
 
 ### Example games (qwen2.5:7b, longest game per cell)
 
-Red frames show failed attempts — what the model tried, and the failure
-class — before each ply resolved.
+One synchronized animation: all six cells advance together on a shared
+move clock; finished games freeze on their result. **Yellow = the move
+played; red = the square of an attempted illegal move** (with the tried
+SAN in the caption). Generated with `chessbench-anim --combined`.
 
-<table>
-<tr><th></th><th>board shown</th><th>blindfold</th></tr>
-<tr><th>standard</th>
-<td><img src="docs/media/7b-standard-board.gif" width="290" alt="standard, board"></td>
-<td><img src="docs/media/7b-standard-blind.gif" width="290" alt="standard, blindfold"></td></tr>
-<tr><th>chess960</th>
-<td><img src="docs/media/7b-chess960-board.gif" width="290" alt="chess960, board"></td>
-<td><img src="docs/media/7b-chess960-blind.gif" width="290" alt="chess960, blindfold"></td></tr>
-<tr><th>offbook</th>
-<td><img src="docs/media/7b-offbook-board.gif" width="290" alt="offbook, board"></td>
-<td><img src="docs/media/7b-offbook-blind.gif" width="290" alt="offbook, blindfold"></td></tr>
-</table>
+<img src="docs/media/7b-all-cells.gif" width="606" alt="All six cells, synchronized: yellow = played move, red = attempted illegal move">
+
 
 ## Validity engineering
 

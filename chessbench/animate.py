@@ -11,6 +11,7 @@ viewer (chessbench.viz).
 from __future__ import annotations
 
 import argparse
+import re
 from pathlib import Path
 
 from PIL import Image, ImageDraw, ImageFont
@@ -77,6 +78,25 @@ def _fen_cells(fen: str) -> list[list[str | None]]:
     return rows  # rank 8 first
 
 
+RED_SQ = (220, 60, 54)  # attempted-bad-move square
+
+_TARGET_SQ_RE = re.compile(r"([a-h][1-8])(?:=?[QRBNqrbn])?[+#]?$")
+
+
+def _fail_squares(fails: list[dict]) -> set[str]:
+    """Target squares of failed attempts (red on the board). Castling and
+    unparseable candidates contribute nothing — the caption still names them."""
+    out = set()
+    for fl in fails:
+        cand = fl.get("candidate") or ""
+        if cand.startswith("O-O"):
+            continue
+        m = _TARGET_SQ_RE.search(cand)
+        if m:
+            out.add(m.group(1))
+    return out
+
+
 class FrameRenderer:
     def __init__(self, square: int, header: str):
         self.sq = square
@@ -88,23 +108,24 @@ class FrameRenderer:
         self.piece_font = _piece_font(int(square * 0.78))
         self.text_font = _load_font(_TEXT_FONT_CANDIDATES, int(square * 0.30))
 
-    def frame(self, fen: str, hl: tuple[str, str] | None, caption: str,
-              caption_bg: tuple[int, int, int] = BG, border: tuple[int, int, int] | None = None) -> Image.Image:
-        img = Image.new("RGB", (self.w, self.h), BG)
+    def board_img(self, fen: str, hl: tuple[str, str] | None = None,
+                  red: set[str] | frozenset[str] = frozenset()) -> Image.Image:
+        """The 8x8 board alone: yellow = played move, red = attempted bad move."""
+        img = Image.new("RGB", (self.sq * 8, self.sq * 8), BG)
         d = ImageDraw.Draw(img)
-        d.text((8, (self.header_h - int(self.sq * 0.30)) // 2), self.header,
-               font=self.text_font, fill=FG)
         cells = _fen_cells(fen)
         hl_squares = set(hl) if hl else set()
         for r in range(8):
             for f in range(8):
                 name = "abcdefgh"[f] + str(8 - r)
                 dark = (r + f) % 2 == 1
-                if name in hl_squares:
+                if name in red:
+                    color = RED_SQ
+                elif name in hl_squares:
                     color = DARK_HL if dark else LIGHT_HL
                 else:
                     color = DARK if dark else LIGHT
-                x0, y0 = f * self.sq, self.header_h + r * self.sq
+                x0, y0 = f * self.sq, r * self.sq
                 d.rectangle([x0, y0, x0 + self.sq - 1, y0 + self.sq - 1], fill=color)
                 pc = cells[r][f]
                 if pc:
@@ -119,7 +140,18 @@ class FrameRenderer:
                         stroke_width=2 if white else 1,
                         stroke_fill=(20, 20, 20) if white else (235, 235, 235),
                     )
+        return img
+
+    def frame(self, fen: str, hl: tuple[str, str] | None, caption: str,
+              caption_bg: tuple[int, int, int] = BG, border: tuple[int, int, int] | None = None,
+              red: set[str] | frozenset[str] = frozenset()) -> Image.Image:
+        img = Image.new("RGB", (self.w, self.h), BG)
+        d = ImageDraw.Draw(img)
+        d.text((8, (self.header_h - int(self.sq * 0.30)) // 2), self.header,
+               font=self.text_font, fill=FG)
+        img.paste(self.board_img(fen, hl, red), (0, self.header_h))
         cap_y = self.header_h + 8 * self.sq
+        d = ImageDraw.Draw(img)
         d.rectangle([0, cap_y, self.w, self.h], fill=caption_bg)
         d.text((8, cap_y + (self.caption_h - int(self.sq * 0.30)) // 2), caption,
                font=self.text_font, fill=FG)
@@ -143,7 +175,8 @@ def animate_game(game: dict, out_path: Path, square: int = 56,
     for i, ply in enumerate(game["plies"], 1):
         if ply["fails"]:
             tried = ", ".join(f"{f['candidate'] or '(no move)'} ({f['class']})" for f in ply["fails"])
-            frames.append(rend.frame(prev_fen, None, f"✗ tried: {tried}", RED, border=RED))
+            frames.append(rend.frame(prev_fen, None, f"tried: {tried}", RED, border=RED,
+                                     red=_fail_squares(ply["fails"])))
             durations.append(fail_ms)
         num = (i + 1) // 2
         dots = "." if i % 2 == 1 else "…"
@@ -159,7 +192,8 @@ def animate_game(game: dict, out_path: Path, square: int = 56,
 
     if game["final_fails"]:
         tried = ", ".join(f"{f['candidate'] or '(no move)'} ({f['class']})" for f in game["final_fails"])
-        frames.append(rend.frame(prev_fen, None, f"✗ tried: {tried}", RED, border=RED))
+        frames.append(rend.frame(prev_fen, None, f"tried: {tried}", RED, border=RED,
+                                 red=_fail_squares(game["final_fails"])))
         durations.append(fail_ms)
     frames.append(rend.frame(prev_fen, None, f"{game['llm_result']} ({game['termination']})",
                              (50, 53, 60)))
@@ -176,22 +210,103 @@ def animate_game(game: dict, out_path: Path, square: int = 56,
     )
 
 
+CELL_ORDER = [("standard", "history+board"), ("standard", "history-only"),
+              ("standard-offbook", "history+board"), ("standard-offbook", "history-only"),
+              ("chess960", "history+board"), ("chess960", "history-only")]
+
+
+def animate_combined(games: list[dict], out_path: Path, square: int = 34,
+                     ply_ms: int = 1000, end_hold_ms: int = 4000) -> None:
+    """One synchronized animation: all six cells advance on a shared ply
+    clock; finished games freeze on their result. Red squares mark attempted
+    bad moves (with the tried SAN in the caption); yellow marks played moves.
+
+    Picks the longest game per cell from `games`."""
+    by_cell: dict = {}
+    for g in games:
+        key = (g["variant"], g["visibility"])
+        if key not in by_cell or len(g["plies"]) > len(by_cell[key]["plies"]):
+            by_cell[key] = g
+    chosen = [(k, by_cell[k]) for k in CELL_ORDER if k in by_cell]
+    if not chosen:
+        return
+
+    def short(variant, vis):
+        v = {"standard": "standard", "standard-offbook": "offbook", "chess960": "chess960"}[variant]
+        return f"{v} · {'board' if vis == 'history+board' else 'blind'}"
+
+    rends = {k: FrameRenderer(square, short(*k)) for k, _ in chosen}
+    max_plies = max(len(g["plies"]) for _, g in chosen)
+    cols, rows = 2, (len(chosen) + 1) // 2
+    gap = 10
+    w1 = square * 8
+    h1 = rends[chosen[0][0]].h
+    W = cols * w1 + (cols + 1) * gap
+    H = rows * h1 + (rows + 1) * gap
+
+    frames, durations = [], []
+    for k_ply in range(max_plies + 1):
+        canvas = Image.new("RGB", (W, H), BG)
+        for i, (key, g) in enumerate(chosen):
+            rend = rends[key]
+            idx = min(k_ply, len(g["plies"]))
+            fen = g["start_fen"] if idx == 0 else g["plies"][idx - 1]["fen"]
+            hl = None if idx == 0 else (g["plies"][idx - 1]["from"], g["plies"][idx - 1]["to"])
+            fails = g["plies"][idx - 1]["fails"] if idx > 0 else []
+            done = k_ply >= len(g["plies"])
+            if done and g["final_fails"]:
+                fails = g["final_fails"]
+            red = _fail_squares(fails)
+            if done:
+                cap = f"{g['llm_result']}"
+                if g["final_fails"]:
+                    cap += "  tried " + ", ".join(f["candidate"] or "?" for f in g["final_fails"][:3])
+                tile = rend.frame(fen, hl, cap, RED if "loss" in g["llm_result"] else (50, 53, 60),
+                                  red=red)
+            elif fails:
+                tried = ", ".join(f["candidate"] or "?" for f in fails[:3])
+                num = (idx + 1) // 2
+                tile = rend.frame(fen, hl, f"tried {tried} -> {num}. {g['plies'][idx - 1]['san']}",
+                                  RED, red=red)
+            else:
+                num = (idx + 1) // 2
+                cap = "start" if idx == 0 else f"{num}. {g['plies'][idx - 1]['san']}"
+                tile = rend.frame(fen, hl, cap)
+            x = gap + (i % cols) * (w1 + gap)
+            y = gap + (i // cols) * (h1 + gap)
+            canvas.paste(tile, (x, y))
+        frames.append(canvas)
+        durations.append(end_hold_ms if k_ply == max_plies else ply_ms)
+
+    out_path.parent.mkdir(parents=True, exist_ok=True)
+    frames[0].save(out_path, save_all=True, append_images=frames[1:],
+                   duration=durations, loop=0, optimize=True)
+
+
 def main(argv: list[str] | None = None) -> int:
     p = argparse.ArgumentParser(prog="chessbench-anim", description=__doc__)
     p.add_argument("run_dir", type=Path)
     p.add_argument("-o", "--out", type=Path, default=None,
                    help="output directory (default: <run_dir>/anim)")
     p.add_argument("--square", type=int, default=56, help="square size in px")
+    p.add_argument("--combined", action="store_true",
+                   help="one synchronized grid animation (longest game per cell) instead of per-game GIFs")
     args = p.parse_args(argv)
 
     out_dir = args.out or (args.run_dir / "anim")
     games = load_run(args.run_dir)
+    if not games:
+        print("no completed games found")
+        return 0
+    if args.combined:
+        out = out_dir / "combined.gif"
+        animate_combined(games, out, square=min(args.square, 36))
+        print(out)
+        return 0
     for g in games:
         out = out_dir / f"{g['id']}.gif"
         animate_game(g, out, square=args.square)
         print(f"{out} ({len(g['plies'])} plies)")
-    if not games:
-        print("no completed games found")
     return 0
 
 
