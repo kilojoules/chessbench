@@ -312,13 +312,15 @@ def effects_figure(summary, illegals: list[dict], out_path: Path) -> None:
     if summary is not None:
         rows = [(n, lab, c) for n, lab, c in ROWS if n in summary.index]
         ys = np.arange(len(rows))[::-1]
-        for yi, (name, lab, color) in zip(ys, rows):
+        for yi, (name, lab, _color) in zip(ys, rows):
             r = summary.loc[name]
             lo, hi = r.get("coef lower 90%"), r.get("coef upper 90%")
-            sig = lo is not None and (lo > 0 or hi < 0)
-            axf.plot([lo, hi], [yi, yi], color=color, solid_capstyle="butt",
-                     linewidth=2.4 if sig else 1.8, alpha=1.0 if sig else 0.38)
-            axf.plot(r["coef"], yi, "s", color=color, markersize=5, zorder=3)
+            # Monochrome by design: significance in a forest plot is
+            # geometric (the interval crosses 1 or it does not) — no ink
+            # rule needed, and hue stays reserved for variant identity in
+            # the right panel (row labels carry the tie by name).
+            axf.plot([lo, hi], [yi, yi], color=INK, solid_capstyle="butt", linewidth=2)
+            axf.plot(r["coef"], yi, "s", color=INK, markersize=5, zorder=3)
             if name == "black":
                 # The equivalence band belongs to this test alone: a small
                 # labeled strip behind the plays-Black row.
@@ -333,7 +335,7 @@ def effects_figure(summary, illegals: list[dict], out_path: Path) -> None:
         ticks = [0.25, 0.5, 1, 2, 4, 8]
         axf.set_xticks([np.log(t) for t in ticks])
         axf.set_xticklabels([str(t) for t in ticks])
-        _style_ax(axf, "When it fails \u2014 hazard ratios (90% CI; darker = clears 1)",
+        _style_ax(axf, "When it fails \u2014 pre-registered hazard ratios (90% CI)",
                   "hazard ratio (log scale) \u2014 right of 1 = fails sooner", "")
     else:
         axf.text(0.5, 0.5, "no Cox fit", ha="center", color=INK_2)
@@ -369,7 +371,13 @@ def effects_figure(summary, illegals: list[dict], out_path: Path) -> None:
             # Counts on the dots that matter \u2014 including the structural zeros,
             # so "phantoms exist only in chess960" is drawn, not implied.
             if hb == 0 and hl_ == 0:
-                axm.text(0.035, yi, "0", fontsize=7.5, color=INK_2, va="center")
+                # Both conditions sit at zero: draw both marks (open ring
+                # over the filled dot) and say so.
+                axm.plot(0, yi, "o", color=color, markersize=7, zorder=2)
+                axm.plot(0, yi, "o", color=color, markersize=7,
+                         markerfacecolor=SURFACE, zorder=3, fillstyle="left")
+                axm.text(0.035, yi, "0 (both conditions)", fontsize=7.5,
+                         color=INK_2, va="center")
             else:
                 axm.text(rb, yi + 0.32, str(hb), fontsize=7.5, color=INK, ha="center")
                 axm.text(rl, yi + 0.32, str(hl_), fontsize=7.5, color=INK, ha="center")
@@ -377,11 +385,12 @@ def effects_figure(summary, illegals: list[dict], out_path: Path) -> None:
     axm.set_yticklabels(labels_b, fontsize=8.5, color=INK)
     axm.set_xlim(-0.03, None)
     axm.xaxis.set_major_formatter(lambda x, _: f"{x:.0%}")
-    _style_ax(axm, "How it fails \u2014 mechanism rates\n(filled = board shown, open = blindfold)",
+    _style_ax(axm, "How it fails \u2014 mechanism rates",
               "share of that cell's illegal attempts", "")
     fig.text(0.005, 0.005,
-             "stale-state = the attempt was legal 1\u20136 plies earlier; phantom-standard = legal replaying "
-             "the same moves from the standard start (structurally 0 outside chess960).",
+             "filled = board shown, open = blindfold \u00b7 stale-state = the attempt was legal 1\u20136 "
+             "plies earlier \u00b7 phantom-standard = legal replaying the same moves from the standard "
+             "start (structurally 0 outside chess960).",
              fontsize=6.8, color=INK_2)
     fig.tight_layout(rect=(0, 0.03, 1, 1))
     fig.savefig(out_path)
