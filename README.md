@@ -161,12 +161,16 @@ resampled with replacement within each cell, 500 seeded replicates,
 **No game in either pilot ended in checkmate** — all 240 ended by forfeit (three failed attempts at one position); the model always breaks on
 legality before the engine can break it on chess.
 
-**The mechanism finding:** 47 illegal attempts in the chess960 cells were
+**The mechanism finding:** 47 of the 191 illegal attempts in the 40
+chess960 games were
 `phantom-standard` — legal moves *on the board that wasn't there* — versus
 **zero** in every other variant. Blindfolded, the phantom rate **doubles**
 (31 vs 16): without a board in view, the model reverts to its memorized
 standard-chess geometry twice as often. Full report:
 [docs/results/qwen25-7b-pilot](docs/results/qwen25-7b-pilot/report.md).
+(These pilots pre-date the halt-at-first-illegal rule, so a game could
+contribute several illegal attempts; under the current rule each game
+contributes at most one.)
 
 ### qwen2.5:3b — below the benchmark's floor
 
