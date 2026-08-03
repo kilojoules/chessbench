@@ -232,6 +232,57 @@ def games_raster(df, out_path: Path) -> None:
     plt.close(fig)
 
 
+def means_plot(df, out_path: Path) -> None:
+    """The simple headline figure: mean LLM moves until the first illegal
+    attempt, per cell (restricted mean survival time, which equals the plain
+    mean when nothing is censored), with bootstrap 90% CIs."""
+    import matplotlib
+    matplotlib.use("Agg")
+    import matplotlib.pyplot as plt
+    import numpy as np
+
+    rng = np.random.default_rng(0)
+    tau = float(df["T"].max())
+
+    def rmst(t, e):
+        # mean of min(T, tau); with full events this is the plain mean
+        return float(np.minimum(t, tau).mean())
+
+    rows = []
+    order = [("standard", "history+board"), ("standard", "history-only"),
+             ("standard-offbook", "history+board"), ("standard-offbook", "history-only"),
+             ("chess960", "history+board"), ("chess960", "history-only")]
+    for variant, vis in order:
+        sub = df[(df["variant"] == variant) & (df["visibility"] == vis)]
+        if sub.empty:
+            continue
+        t = sub["T"].to_numpy()
+        m = rmst(t, sub["E"].to_numpy())
+        boots = [rmst(t[rng.integers(0, len(t), len(t))], None) for _ in range(500)]
+        lo, hi = np.percentile(boots, [5, 95])
+        rows.append((variant, vis, m, lo, hi, len(sub)))
+
+    fig, ax = plt.subplots(figsize=(7.5, 3.6), dpi=200)
+    ys = np.arange(len(rows))[::-1]
+    for yi, (variant, vis, m, lo, hi, n) in zip(ys, rows):
+        color = VARIANT_COLOR.get(variant, INK_2)
+        blind = vis == "history-only"
+        ax.plot([lo, hi], [yi, yi], color=color, linewidth=1.6)
+        ax.plot(m, yi, "o", color=color, markersize=8,
+                markerfacecolor=SURFACE if blind else color)
+        ax.text(hi + 0.08, yi, f"{m:.1f}", va="center", fontsize=9, color=INK)
+    labels = [f"{v.replace('standard-offbook', 'offbook')} · {'blind' if vis == 'history-only' else 'board'}"
+              for v, vis, *_ in rows]
+    ax.set_yticks(ys)
+    ax.set_yticklabels(labels, fontsize=9, color=INK)
+    ax.set_xlim(0, None)
+    _style_ax(ax, "Mean LLM moves until the first illegal attempt (90% CI)",
+              "moves (higher = survives longer; filled = board shown, open = blindfold)", "")
+    fig.tight_layout()
+    fig.savefig(out_path)
+    plt.close(fig)
+
+
 def effects_figure(summary, illegals: list[dict], out_path: Path) -> None:
     """Left: forest plot of the pre-registered Cox effects (log-HR scale,
     H1 equivalence band). Right: mechanism-rate dumbbells (stale-state and
@@ -494,6 +545,7 @@ def write_report(df, df_illonly, games: list[dict], illegals: list[dict],
     km_plot(df, out_dir / "km.png")
     hazard_plot(df, out_dir / "hazard.png")
     games_raster(df, out_dir / "games.png")
+    means_plot(df, out_dir / "means.png")
 
     summary, cox_note = cox_fit(df)
     effects_figure(summary, illegals, out_dir / "effects.png")
@@ -514,7 +566,8 @@ def write_report(df, df_illonly, games: list[dict], illegals: list[dict],
                      f"{sub['T'].median():.0f}"])
     parts.append("## Per-cell summary\n")
     parts.append(_md_table(["cell", "games", "events", "median event move", "median exposure"], rows))
-    parts.append("\n![Every game](games.png)\n\n![Effects and mechanisms](effects.png)\n\n"
+    parts.append("\n![Every game](games.png)\n\n![Mean moves to first illegal attempt](means.png)\n\n"
+                 "![Effects and mechanisms](effects.png)\n\n"
                  "![Kaplan-Meier](km.png)\n\n![Discrete hazard](hazard.png)\n")
 
     # Cox

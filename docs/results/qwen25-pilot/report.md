@@ -18,6 +18,8 @@ Pre-registered analysis per PLAN.md §7 (time scale: LLM move index; event: firs
 
 ![Every game](games.png)
 
+![Mean moves to first illegal attempt](means.png)
+
 ![Effects and mechanisms](effects.png)
 
 ![Kaplan-Meier](km.png)

@@ -46,7 +46,7 @@ direct signature of pattern-matching on standard-chess geometry.
 
 ![Every game, qwen2.5:7b](docs/results/qwen25-7b-pilot/games.png)
 
-![Effects and mechanisms, qwen2.5:7b](docs/results/qwen25-7b-pilot/effects.png)
+![Mean moves to first illegal attempt, qwen2.5:7b](docs/results/qwen25-7b-pilot/means.png)
 
 #### How to read the numbers
 
@@ -86,6 +86,9 @@ conflate failing fast with playing long.
 | blindfold × 960 (H4) | 1.45 | [0.83, 2.52] | .28 | positive (pattern-matching prediction), underpowered at 20/cell |
 | blindfold × offbook | 0.67 | [0.29, 1.54] | .43 | inconclusive |
 | plays Black (H1) | 0.94 | [0.65, 1.37] | — | equivalence vs margin [0.67, 1.5]: inconclusive at this tier |
+
+**No game in either pilot ended in checkmate** — all 240 ended by forfeit (three failed attempts at one position); the model always breaks on
+legality before the engine can break it on chess.
 
 **The mechanism finding:** 47 illegal attempts in the chess960 cells were
 `phantom-standard` — legal moves *on the board that wasn't there* — versus
