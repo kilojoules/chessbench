@@ -236,7 +236,34 @@ def animate_combined(games: list[dict], out_path: Path, square: int = 34,
         return f"{v} · {'board' if vis == 'history+board' else 'blind'}"
 
     rends = {k: FrameRenderer(square, short(*k)) for k, _ in chosen}
-    max_plies = max(len(g["plies"]) for _, g in chosen)
+
+    def timeline(g):
+        """Board states up to and INCLUDING the first illegal/ambiguous
+        attempt: the board freezes there, red-highlighted, while other
+        games play on. Games without an event freeze on their final state."""
+        states = [dict(fen=g["start_fen"], hl=None, red=frozenset(), cap="start", bg=BG)]
+        for i, ply in enumerate(g["plies"], 1):
+            ev = [f for f in ply["fails"] if f["class"] in ("illegal", "ambiguous")]
+            if ev:
+                states.append(dict(
+                    fen=states[-1]["fen"], hl=None, red=_fail_squares(ev),
+                    cap=f"tried {ev[0]['candidate'] or '?'} ({ev[0]['class']})", bg=RED))
+                return states
+            num = (i + 1) // 2
+            states.append(dict(fen=ply["fen"], hl=(ply["from"], ply["to"]),
+                               red=frozenset(), cap=f"{num}. {ply['san']}", bg=BG))
+        ev = [f for f in g["final_fails"] if f["class"] in ("illegal", "ambiguous")]
+        if ev:
+            states.append(dict(
+                fen=states[-1]["fen"], hl=None, red=_fail_squares(ev),
+                cap=f"tried {ev[0]['candidate'] or '?'} ({ev[0]['class']})", bg=RED))
+        else:
+            states.append(dict(fen=states[-1]["fen"], hl=states[-1]["hl"],
+                               red=frozenset(), cap=g["llm_result"], bg=(50, 53, 60)))
+        return states
+
+    lines = {k: timeline(g) for k, g in chosen}
+    n_frames = max(len(s) for s in lines.values())
     cols, rows = 2, (len(chosen) + 1) // 2
     gap = 10
     w1 = square * 8
@@ -245,38 +272,16 @@ def animate_combined(games: list[dict], out_path: Path, square: int = 34,
     H = rows * h1 + (rows + 1) * gap
 
     frames, durations = [], []
-    for k_ply in range(max_plies + 1):
+    for k in range(n_frames):
         canvas = Image.new("RGB", (W, H), BG)
         for i, (key, g) in enumerate(chosen):
-            rend = rends[key]
-            idx = min(k_ply, len(g["plies"]))
-            fen = g["start_fen"] if idx == 0 else g["plies"][idx - 1]["fen"]
-            hl = None if idx == 0 else (g["plies"][idx - 1]["from"], g["plies"][idx - 1]["to"])
-            fails = g["plies"][idx - 1]["fails"] if idx > 0 else []
-            done = k_ply >= len(g["plies"])
-            if done and g["final_fails"]:
-                fails = g["final_fails"]
-            red = _fail_squares(fails)
-            if done:
-                cap = f"{g['llm_result']}"
-                if g["final_fails"]:
-                    cap += "  tried " + ", ".join(f["candidate"] or "?" for f in g["final_fails"][:3])
-                tile = rend.frame(fen, hl, cap, RED if "loss" in g["llm_result"] else (50, 53, 60),
-                                  red=red)
-            elif fails:
-                tried = ", ".join(f["candidate"] or "?" for f in fails[:3])
-                num = (idx + 1) // 2
-                tile = rend.frame(fen, hl, f"tried {tried} -> {num}. {g['plies'][idx - 1]['san']}",
-                                  RED, red=red)
-            else:
-                num = (idx + 1) // 2
-                cap = "start" if idx == 0 else f"{num}. {g['plies'][idx - 1]['san']}"
-                tile = rend.frame(fen, hl, cap)
+            st = lines[key][min(k, len(lines[key]) - 1)]
+            tile = rends[key].frame(st["fen"], st["hl"], st["cap"], st["bg"], red=st["red"])
             x = gap + (i % cols) * (w1 + gap)
             y = gap + (i // cols) * (h1 + gap)
             canvas.paste(tile, (x, y))
         frames.append(canvas)
-        durations.append(end_hold_ms if k_ply == max_plies else ply_ms)
+        durations.append(end_hold_ms if k == n_frames - 1 else ply_ms)
 
     out_path.parent.mkdir(parents=True, exist_ok=True)
     frames[0].save(out_path, save_all=True, append_images=frames[1:],
