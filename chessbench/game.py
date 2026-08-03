@@ -30,7 +30,8 @@ def play_game(spec: GameSpec, llm, engine, out_dir: Path) -> dict:
     san_history: list[str] = []
     sys_prompt = system_prompt(spec)
 
-    termination = None  # outcome name | "move_cap" | "llm_forfeit" | "llm_truncated"
+    termination = None  # outcome name | "move_cap" | "llm_illegal" (halted at
+    # the survival event) | "llm_forfeit" (format attempts exhausted) | "llm_truncated"
     winner = None  # "llm" | "engine" | None
     result_str = "*"
     counts = {"legal": 0, "illegal": 0, "ambiguous": 0, "invalid": 0, "truncated": 0}
@@ -109,6 +110,7 @@ def play_game(spec: GameSpec, llm, engine, out_dir: Path) -> dict:
                 ]
                 played = False
                 infra_truncated = False
+                halted_on_event = False
                 attempt = 0
                 trunc_tries = 0
                 ply_classes: list[str] = []
@@ -196,12 +198,23 @@ def play_game(spec: GameSpec, llm, engine, out_dir: Path) -> dict:
                         board.push_san(pr.move_san)
                         played = True
                         break
+                    if pr.parse_class in ("illegal", "ambiguous"):
+                        # The survival event: the game halts here. Only
+                        # format-invalid responses get retries — an illegal
+                        # attempt IS the measurement.
+                        halted_on_event = True
+                        break
                     messages.append({"role": "assistant", "content": resp.text})
                     messages.append({"role": "user", "content": retry_feedback(pr)})
                 if infra_truncated:
                     # Persistent truncation is a harness/budget problem, not a
                     # chess result: censor the game, never record a loss.
                     termination = "llm_truncated"
+                    break
+                if halted_on_event:
+                    termination = "llm_illegal"
+                    winner = "engine"
+                    result_str = "0-1" if llm_is_white else "1-0"
                     break
                 if not played:
                     # Forfeit: failed to produce a legal move within the
@@ -230,7 +243,9 @@ def play_game(spec: GameSpec, llm, engine, out_dir: Path) -> dict:
                 san_history.append(san)
                 board.push(move)
 
-        if termination == "llm_forfeit":
+        if termination == "llm_illegal":
+            llm_result = "loss_illegal"
+        elif termination == "llm_forfeit":
             llm_result = "loss_forfeit"
         elif termination == "llm_truncated":
             llm_result = "censored_infra"

@@ -367,6 +367,20 @@ writeup must be reported as such.
   Conclusions stated per-model; no pooled "LLMs do X" claim without a
   heterogeneity analysis across models.
 
+- **Amendment v1.3 (2026-08-02):** games HALT at the first
+  illegal-or-ambiguous attempt (the survival event) instead of granting
+  retries and playing on. Rationale: the primary metric is defined by the
+  first event, so post-event play added compute and post-event attempts
+  without touching the estimand; halting aligns the game object with the
+  measurement. Format-invalid responses keep their retry budget (format
+  noise must not end games), so `llm_forfeit` now occurs only via
+  exhausted format attempts, while `llm_illegal` marks an event halt.
+  Event times and censoring are IDENTICAL in meaning to pre-amendment
+  data (the pilots' primary analyses remain valid); the error-taxonomy
+  composition changes, since post-event illegal attempts are no longer
+  collected — cross-run taxonomy comparisons must respect the rule
+  boundary.
+
 ### Planned design additions before the main run
 
 1. **Bridge condition "standard-offbook":** standard rules and geometry,

@@ -56,38 +56,47 @@ def test_clean_game_runs_to_completion(tmp_path):
     assert (tmp_path / "clean.pgn").exists()
 
 
-def test_always_illegal_loses_at_first_move(tmp_path):
+def test_first_illegal_attempt_halts_the_game(tmp_path):
     spec = make_spec("lose")
     rec = play_game(spec, FakeLLM(policy="always-illegal"), StubEngine(), tmp_path)
-    assert rec["termination"] == "llm_forfeit"
-    assert rec["llm_result"] == "loss_forfeit"
-    assert rec["forfeit_attempt_classes"] == ["illegal", "illegal", "illegal"]
+    assert rec["termination"] == "llm_illegal"
+    assert rec["llm_result"] == "loss_illegal"
+    assert rec["forfeit_attempt_classes"] is None
     assert rec["winner"] == "engine"
     assert rec["result"] == "0-1"  # LLM was white and lost
     assert rec["event"] is True
     assert rec["first_illegal_ply"] == 1
     assert rec["first_illegal_llm_move"] == 1
-    assert rec["counts"]["illegal"] == 3  # max_attempts exhausted
+    assert rec["counts"]["illegal"] == 1  # no retries for the event class
     attempts = [r for r in read_records(tmp_path / "lose.jsonl") if r["type"] == "attempt"]
-    assert [a["attempt"] for a in attempts] == [1, 2, 3]
+    assert [a["attempt"] for a in attempts] == [1]
 
 
-def test_retry_recovery_continues_game(tmp_path):
-    spec = make_spec("recover", max_plies=12)
+def test_halt_at_second_move_event(tmp_path):
+    spec = make_spec("halt2", max_plies=12)
     llm = FakeLLM(policy="first", illegal_at={2})
     rec = play_game(spec, llm, StubEngine(), tmp_path)
-    assert rec["termination"] != "llm_forfeit"
+    assert rec["termination"] == "llm_illegal"
     assert rec["event"] is True
-    # LLM is white: its 2nd move is game ply 3.
+    # LLM is white: its 2nd move is game ply 3; the game ends there.
     assert rec["first_illegal_ply"] == 3
     assert rec["first_illegal_llm_move"] == 2
     assert rec["survival_plies"] == 3
     assert rec["survival_llm_moves"] == 2
     assert rec["counts"]["illegal"] == 1
-    # The failed ply has two attempts: illegal then legal.
-    attempts = [r for r in read_records(tmp_path / "recover.jsonl") if r["type"] == "attempt"]
-    ply3 = [a for a in attempts if a["ply"] == 3]
-    assert [a["parse_class"] for a in ply3] == ["illegal", "legal"]
+    assert rec["plies"] == 2  # two plies actually played before the halt
+    attempts = [r for r in read_records(tmp_path / "halt2.jsonl") if r["type"] == "attempt"]
+    assert attempts[-1]["parse_class"] == "illegal"
+
+
+def test_invalid_format_still_gets_retries(tmp_path):
+    llm = FakeLLM(script=["no move here at all", "MOVE: a3", "MOVE: a6"])
+    spec = make_spec("fmt", max_plies=2)
+    rec = play_game(spec, llm, StubEngine(), tmp_path)
+    # Format failure retried, legal move played, game reached the cap.
+    assert rec["termination"] == "move_cap"
+    assert rec["counts"]["invalid"] == 1
+    assert rec["event"] is False
 
 
 def test_black_llm_ply_numbering(tmp_path):
@@ -171,7 +180,7 @@ def test_ambiguous_counts_as_survival_event(tmp_path):
     assert rec["first_illegal_ply"] is None
     assert rec["survival_plies"] == 1
     assert rec["counts"]["ambiguous"] == 1
-    assert rec["termination"] == "move_cap"
+    assert rec["termination"] == "llm_illegal"  # ambiguous is the event: halt
 
 
 class TruncatingLLM:

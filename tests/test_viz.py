@@ -30,9 +30,10 @@ def test_viewer_roundtrip(tmp_path):
     games = load_run(tmp_path)
     assert len(games) == 2
     g1 = next(g for g in games if g["id"] == "v1")
-    # The illegal attempt at llm move 2 (game ply 3) attaches to that ply.
-    assert g1["plies"][2]["fails"], "expected a failed attempt on ply 3"
-    assert g1["plies"][2]["fails"][0]["class"] == "illegal"
+    # The game halts at the illegal attempt (llm move 2, game ply 3): the
+    # attempt lands in final_fails and only two plies were played.
+    assert len(g1["plies"]) == 2
+    assert g1["final_fails"] and g1["final_fails"][0]["class"] == "illegal"
     assert all("fen" in p for p in g1["plies"])
     html = build_html(games, "test run")
     assert "v1" in html and "v2" in html

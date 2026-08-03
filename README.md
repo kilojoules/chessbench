@@ -87,11 +87,12 @@ It is your move — you are Black (move 3). Reply with your move, ending with th
 The **blindfold** condition is identical minus the `Current position` /
 `Current board` block — the model gets the starting FEN and the move list,
 nothing else. (Chess960 positions use Shredder-FEN castling fields, e.g.
-`HChc` instead of `KQkq`.) On a failed attempt the model gets one minimal
-retry message (e.g. *"Your move 'Qd4' is illegal in the current position.
-Reply again with a legal move…"*) — deliberately identical in information
-content across conditions, so feedback never leaks board state into the
-blindfold cells. Up to 3 attempts per move, then the game is forfeit.
+`HChc` instead of `KQkq`.) **An illegal or ambiguous attempt ends the game
+immediately** — it *is* the survival event being measured. Only
+format-invalid replies (no parseable move at all) get a minimal retry
+message, up to 3 attempts, then the game is forfeit; retry feedback is
+deliberately identical in information content across conditions, so it
+never leaks board state into the blindfold cells.
 
 ## Results so far (local pilots, 120 games per model)
 
