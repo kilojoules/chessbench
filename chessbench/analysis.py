@@ -583,6 +583,10 @@ def write_report(df, df_illonly, games: list[dict], illegals: list[dict],
         parts.append(_md_table(["covariate", "log-HR", "HR", "90% CI", "p"], cox_rows))
         parts.append("\nH4 is the `blind_x_960` row: positive log-HR = blindfold hurts "
                      "more in chess960 than in standard (the pattern-matching prediction).\n")
+        parts.append("\n_CIs: Wald intervals on log-HR with cluster-robust (sandwich) SEs "
+                     "clustered by start position/prefix, exp-transformed; 90% level chosen "
+                     "so the H1 equivalence test follows the TOST convention (90% CI inside "
+                     "the margin = alpha 0.05 equivalence)._\n")
     else:
         parts.append(f"_{cox_note}_\n")
     parts.append(f"\n**H1 color equivalence:** {color_equivalence(summary)}\n")

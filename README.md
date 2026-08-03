@@ -130,6 +130,23 @@ means no effect. Survival framing is used because it handles censored games
 and unequal exposure correctly — "% of games with an illegal move" would
 conflate failing fast with playing long.
 
+**Confidence intervals.** The Cox CIs are Wald intervals on the log-hazard
+scale with **cluster-robust (sandwich) standard errors**, clustered on the
+start position/prefix — games sharing a start position are not independent,
+and naive SEs would overstate precision:
+
+```math
+\mathrm{CI}_{90\%}(\mathrm{HR}_j) \;=\; \exp\!\big(\hat\beta_j \pm 1.645\,\widehat{\mathrm{SE}}_{\mathrm{cluster}}(\hat\beta_j)\big).
+```
+
+The 90% level is deliberate: H1 is an equivalence test, and by the
+two-one-sided-tests (TOST) convention, "90% CI entirely inside the margin"
+is an $\alpha = 0.05$ equivalence test — so one interval serves both the
+difference tests and the equivalence test. The mean-survival figure uses a
+different construction: a nonparametric percentile bootstrap (games
+resampled with replacement within each cell, 500 seeded replicates,
+5th–95th percentiles).
+
 #### Pre-registered tests (qwen2.5:7b, 90% CIs)
 
 | Test | HR | 90% CI | p | Reading |

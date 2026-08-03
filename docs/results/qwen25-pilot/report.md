@@ -40,6 +40,9 @@ Pre-registered analysis per PLAN.md §7 (time scale: LLM move index; event: firs
 H4 is the `blind_x_960` row: positive log-HR = blindfold hurts more in chess960 than in standard (the pattern-matching prediction).
 
 
+_CIs: Wald intervals on log-HR with cluster-robust (sandwich) SEs clustered by start position/prefix, exp-transformed; 90% level chosen so the H1 equivalence test follows the TOST convention (90% CI inside the margin = alpha 0.05 equivalence)._
+
+
 **H1 color equivalence:** HR(black) = 1.02, 90% CI [0.70, 1.48] vs margin [0.67, 1.5] → EQUIVALENT within the pre-registered margin
 
 ## Color control (White vs Black, per cell)
