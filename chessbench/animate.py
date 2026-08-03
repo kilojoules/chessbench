@@ -98,10 +98,11 @@ def _fail_squares(fails: list[dict]) -> set[str]:
 
 
 class FrameRenderer:
-    def __init__(self, square: int, header: str):
+    def __init__(self, square: int, header: str, subheader: str | None = None):
         self.sq = square
         self.header = header
-        self.header_h = int(square * 0.55)
+        self.subheader = subheader
+        self.header_h = int(square * (1.05 if subheader else 0.55))
         self.caption_h = int(square * 0.65)
         self.w = square * 8
         self.h = self.header_h + square * 8 + self.caption_h
@@ -147,8 +148,14 @@ class FrameRenderer:
               red: set[str] | frozenset[str] = frozenset()) -> Image.Image:
         img = Image.new("RGB", (self.w, self.h), BG)
         d = ImageDraw.Draw(img)
-        d.text((8, (self.header_h - int(self.sq * 0.30)) // 2), self.header,
-               font=self.text_font, fill=FG)
+        line_h = int(self.sq * 0.30)
+        if self.subheader:
+            d.text((8, int(self.sq * 0.10)), self.header, font=self.text_font, fill=FG)
+            d.text((8, int(self.sq * 0.10) + line_h + 4), self.subheader,
+                   font=self.text_font, fill=(150, 152, 158))
+        else:
+            d.text((8, (self.header_h - line_h) // 2), self.header,
+                   font=self.text_font, fill=FG)
         img.paste(self.board_img(fen, hl, red), (0, self.header_h))
         cap_y = self.header_h + 8 * self.sq
         d = ImageDraw.Draw(img)
@@ -222,8 +229,12 @@ def animate_combined(games: list[dict], out_path: Path, square: int = 34,
     bad moves (with the tried SAN in the caption); yellow marks played moves.
 
     Picks the longest game per cell from `games`."""
+    # One consistent perspective: only games where the model plays White
+    # (White at the bottom of every board = the model).
     by_cell: dict = {}
     for g in games:
+        if g["llm_color"] != "white":
+            continue
         key = (g["variant"], g["visibility"])
         if key not in by_cell or len(g["plies"]) > len(by_cell[key]["plies"]):
             by_cell[key] = g
@@ -235,7 +246,12 @@ def animate_combined(games: list[dict], out_path: Path, square: int = 34,
         v = {"standard": "standard", "standard-offbook": "offbook", "chess960": "chess960"}[variant]
         return f"{v} · {'board' if vis == 'history+board' else 'blind'}"
 
-    rends = {k: FrameRenderer(square, short(*k)) for k, _ in chosen}
+    def model_name(g):
+        return g["model"].split("/")[-1]
+
+    rends = {k: FrameRenderer(square, short(*k),
+                              subheader=f"{model_name(g)} = White · Stockfish = Black")
+             for k, g in chosen}
 
     def timeline(g):
         """Board states up to and INCLUDING the first illegal/ambiguous
@@ -258,8 +274,11 @@ def animate_combined(games: list[dict], out_path: Path, square: int = 34,
                     cap=f"tried {ev[0]['candidate'] or '?'} ({ev[0]['class']})", bg=RED))
                 return states
             num = (i0 + i + 1) // 2  # true move number, prefix included
+            mover = model_name(g) if ply["by"] == "llm" else "Stockfish"
+            dots = "." if (i0 + i) % 2 == 1 else "..."
             states.append(dict(fen=ply["fen"], hl=(ply["from"], ply["to"]),
-                               red=frozenset(), cap=f"{num}. {ply['san']}", bg=BG))
+                               red=frozenset(),
+                               cap=f"{num}{dots} {ply['san']}  ({mover})", bg=BG))
         ev = [f for f in g["final_fails"] if f["class"] in ("illegal", "ambiguous")]
         if ev:
             states.append(dict(
