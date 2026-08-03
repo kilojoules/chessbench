@@ -240,16 +240,24 @@ def animate_combined(games: list[dict], out_path: Path, square: int = 34,
     def timeline(g):
         """Board states up to and INCLUDING the first illegal/ambiguous
         attempt: the board freezes there, red-highlighted, while other
-        games play on. Games without an event freeze on their final state."""
-        states = [dict(fen=g["start_fen"], hl=None, red=frozenset(), cap="start", bg=BG)]
-        for i, ply in enumerate(g["plies"], 1):
+        games play on. Games without an event freeze on their final state.
+        Offbook setup moves are skipped — frame 0 is the position where the
+        model's game actually starts."""
+        plies = g["plies"]
+        i0 = 0
+        while i0 < len(plies) and plies[i0]["by"] == "prefix":
+            i0 += 1
+        first_fen = plies[i0 - 1]["fen"] if i0 else g["start_fen"]
+        cap0 = "start (after random opening)" if i0 else "start"
+        states = [dict(fen=first_fen, hl=None, red=frozenset(), cap=cap0, bg=BG)]
+        for i, ply in enumerate(plies[i0:], 1):
             ev = [f for f in ply["fails"] if f["class"] in ("illegal", "ambiguous")]
             if ev:
                 states.append(dict(
                     fen=states[-1]["fen"], hl=None, red=_fail_squares(ev),
                     cap=f"tried {ev[0]['candidate'] or '?'} ({ev[0]['class']})", bg=RED))
                 return states
-            num = (i + 1) // 2
+            num = (i0 + i + 1) // 2  # true move number, prefix included
             states.append(dict(fen=ply["fen"], hl=(ply["from"], ply["to"]),
                                red=frozenset(), cap=f"{num}. {ply['san']}", bg=BG))
         ev = [f for f in g["final_fails"] if f["class"] in ("illegal", "ambiguous")]

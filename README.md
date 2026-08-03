@@ -167,7 +167,9 @@ move clock, and **each board freezes at its first illegal attempt** — the
 attempted move's square in red with the tried SAN in the caption — while
 the surviving games play on (yellow = moves actually played). Watching
 the boards die one by one *is* the result. Generated with
-`chessbench-anim --combined`.
+`chessbench-anim --combined`. Offbook boards start from their
+post-random-opening position — frame one is the first decision the model
+actually makes, in every cell.
 
 <img src="docs/media/7b-all-cells.gif" width="606" alt="All six cells, synchronized: yellow = played move, red = attempted illegal move">
 
