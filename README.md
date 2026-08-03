@@ -40,6 +40,59 @@ the `phantom-standard` class: a move that would have been *legal* if the
 same movetext had been played from the standard starting position — the
 direct signature of pattern-matching on standard-chess geometry.
 
+### What the model actually sees
+
+Every prompt is logged verbatim in the game records; these are real examples
+from a logged game. The **system prompt** (constant within a game):
+
+```text
+You are playing a game of chess against an opponent. This is a game of standard chess, played from the normal starting position.
+
+You are playing Black.
+
+On each turn, decide on your move and reply with it in standard algebraic notation (SAN). You may reason briefly first, but the final line of your reply must have exactly this format:
+MOVE: <your move>
+
+Examples: "MOVE: e4", "MOVE: Nf3", "MOVE: O-O", "MOVE: exd8=Q+".
+
+If a move could be made by more than one of your pieces, disambiguate it with the originating file or rank (e.g. "MOVE: Nbd2", "MOVE: R1e2").
+
+Only legal moves are accepted.
+```
+
+(Chess960 games get an extra paragraph explaining the shuffled start and 960
+castling; offbook games are told the opening was played by a neutral
+randomizer.) Each turn, the **move request** in the `board shown` condition:
+
+```text
+Starting position (FEN): rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1
+Moves played so far: 1. Nf3 e5 2. e4 d5 3. d4
+
+Current position (FEN): rnbqkbnr/ppp2ppp/8/3pp3/3PP3/5N2/PPP2PPP/RNBQKB1R b KQkq - 0 3
+Current board (uppercase = White, lowercase = Black):
+8 | r n b q k b n r
+7 | p p p . . p p p
+6 | . . . . . . . .
+5 | . . . p p . . .
+4 | . . . P P . . .
+3 | . . . . . N . .
+2 | P P P . . P P P
+1 | R N B Q K B . R
+  +----------------
+    a b c d e f g h
+
+It is your move — you are Black (move 3). Reply with your move, ending with the line 'MOVE: <san>'.
+```
+
+The **blindfold** condition is identical minus the `Current position` /
+`Current board` block — the model gets the starting FEN and the move list,
+nothing else. (Chess960 positions use Shredder-FEN castling fields, e.g.
+`HChc` instead of `KQkq`.) On a failed attempt the model gets one minimal
+retry message (e.g. *"Your move 'Qd4' is illegal in the current position.
+Reply again with a legal move…"*) — deliberately identical in information
+content across conditions, so feedback never leaks board state into the
+blindfold cells. Up to 3 attempts per move, then the game is forfeit.
+
 ## Results so far (local pilots, 120 games per model)
 
 ### qwen2.5:7b — the first tier with real separation
