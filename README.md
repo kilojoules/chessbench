@@ -181,8 +181,9 @@ chess960 cells. Report:
 
 One synchronized animation — **qwen plays White on every board** (labeled,
 with each move attributed to qwen or Stockfish): all six cells advance
-together on a shared move clock, and **each board freezes at its first illegal attempt** — the
-attempted move's square in red with the tried SAN in the caption — while
+together on a shared move clock, and **each board freezes at its first illegal attempt** — the piece is
+shown moved to its intended square, with both the origin and destination
+squares in red and the tried SAN in the caption — while
 the surviving games play on (yellow = moves actually played). Watching
 the boards die one by one *is* the result. Generated with
 `chessbench-anim --combined`. Offbook boards start from their

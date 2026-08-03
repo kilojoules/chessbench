@@ -78,14 +78,16 @@ def _fen_cells(fen: str) -> list[list[str | None]]:
     return rows  # rank 8 first
 
 
-RED_SQ = (220, 60, 54)  # attempted-bad-move square
+RED_SQ = (220, 60, 54)  # attempted-bad-move squares (origin + destination)
 
 _TARGET_SQ_RE = re.compile(r"([a-h][1-8])(?:=?[QRBNqrbn])?[+#]?$")
+_SAN_PARTS_RE = re.compile(r"^([KQRBN])?([a-h])?([1-8])?[x-]?([a-h][1-8])(=?[QRBNqrbn])?[+#]?$")
 
 
 def _fail_squares(fails: list[dict]) -> set[str]:
-    """Target squares of failed attempts (red on the board). Castling and
-    unparseable candidates contribute nothing — the caption still names them."""
+    """Target squares of failed attempts (fallback red when the move can't
+    be ghost-executed). Castling and unparseable candidates contribute
+    nothing — the caption still names them."""
     out = set()
     for fl in fails:
         cand = fl.get("candidate") or ""
@@ -95,6 +97,63 @@ def _fail_squares(fails: list[dict]) -> set[str]:
         if m:
             out.add(m.group(1))
     return out
+
+
+def _ghost_move(fen: str, candidate: str, mover_is_white: bool):
+    """Best-effort EXECUTION of an illegal SAN: pick the mover's most
+    plausible piece for the attempt, move it to the intended square, and
+    return (ghost_fen, origin_square, target_square). None when the attempt
+    names no piece the mover has (or is castling/unparseable)."""
+    import chess
+
+    cand = (candidate or "").strip()
+    if not cand or cand.startswith("O-O"):
+        return None
+    m = _SAN_PARTS_RE.match(cand)
+    if not m:
+        return None
+    piece_letter, from_file, from_rank, target, _promo = m.groups()
+    board = chess.Board(fen, chess960=True)  # tolerant of Shredder castling fields
+    color = chess.WHITE if mover_is_white else chess.BLACK
+    ptype = chess.Piece.from_symbol(piece_letter).piece_type if piece_letter else chess.PAWN
+    tsq = chess.parse_square(target)
+
+    cands = []
+    for sq in board.pieces(ptype, color):
+        if from_file and chess.square_file(sq) != "abcdefgh".index(from_file):
+            continue
+        if from_rank and chess.square_rank(sq) != int(from_rank) - 1:
+            continue
+        cands.append(sq)
+    if ptype == chess.PAWN and not from_file:
+        # A pawn push ("d5") can only intend the destination-file pawn.
+        on_file = [s for s in cands if chess.square_file(s) == chess.square_file(tsq)]
+        cands = on_file or cands
+    if not cands:
+        return None
+
+    def plausible(sq):
+        if ptype == chess.PAWN:
+            df = abs(chess.square_file(sq) - chess.square_file(tsq))
+            toward = (chess.square_rank(tsq) - chess.square_rank(sq)) * (1 if color else -1)
+            return (df == 0 and 1 <= toward <= 2) or (df == 1 and toward == 1)
+        return tsq in board.attacks(sq)
+
+    best = [s for s in cands if plausible(s)] or cands
+    frm = min(best, key=lambda s: chess.square_distance(s, tsq))
+    piece = board.remove_piece_at(frm)
+    board.set_piece_at(tsq, piece)
+    return board.fen(), chess.square_name(frm), chess.square_name(tsq)
+
+
+def _event_ghost(fen: str, fails: list[dict], mover_is_white: bool):
+    """(ghost_fen, red_squares) for the first ghostable failed attempt;
+    falls back to the pre-attempt position with target-only red."""
+    for fl in fails:
+        g = _ghost_move(fen, fl.get("candidate"), mover_is_white)
+        if g:
+            return g[0], {g[1], g[2]}
+    return fen, _fail_squares(fails)
 
 
 class FrameRenderer:
@@ -179,11 +238,12 @@ def animate_game(game: dict, out_path: Path, square: int = 56,
     durations.append(ply_ms)
 
     prev_fen = game["start_fen"]
+    mover_white = game["llm_color"] == "white"
     for i, ply in enumerate(game["plies"], 1):
         if ply["fails"]:
             tried = ", ".join(f"{f['candidate'] or '(no move)'} ({f['class']})" for f in ply["fails"])
-            frames.append(rend.frame(prev_fen, None, f"tried: {tried}", RED, border=RED,
-                                     red=_fail_squares(ply["fails"])))
+            gfen, red = _event_ghost(prev_fen, ply["fails"], mover_white)
+            frames.append(rend.frame(gfen, None, f"tried: {tried}", RED, border=RED, red=red))
             durations.append(fail_ms)
         num = (i + 1) // 2
         dots = "." if i % 2 == 1 else "…"
@@ -199,8 +259,8 @@ def animate_game(game: dict, out_path: Path, square: int = 56,
 
     if game["final_fails"]:
         tried = ", ".join(f"{f['candidate'] or '(no move)'} ({f['class']})" for f in game["final_fails"])
-        frames.append(rend.frame(prev_fen, None, f"tried: {tried}", RED, border=RED,
-                                 red=_fail_squares(game["final_fails"])))
+        gfen, red = _event_ghost(prev_fen, game["final_fails"], mover_white)
+        frames.append(rend.frame(gfen, None, f"tried: {tried}", RED, border=RED, red=red))
         durations.append(fail_ms)
     frames.append(rend.frame(prev_fen, None, f"{game['llm_result']} ({game['termination']})",
                              (50, 53, 60)))
@@ -266,11 +326,13 @@ def animate_combined(games: list[dict], out_path: Path, square: int = 34,
         first_fen = plies[i0 - 1]["fen"] if i0 else g["start_fen"]
         cap0 = "start (after random opening)" if i0 else "start"
         states = [dict(fen=first_fen, hl=None, red=frozenset(), cap=cap0, bg=BG)]
+        mover_white = g["llm_color"] == "white"
         for i, ply in enumerate(plies[i0:], 1):
             ev = [f for f in ply["fails"] if f["class"] in ("illegal", "ambiguous")]
             if ev:
+                gfen, red = _event_ghost(states[-1]["fen"], ev, mover_white)
                 states.append(dict(
-                    fen=states[-1]["fen"], hl=None, red=_fail_squares(ev),
+                    fen=gfen, hl=None, red=red,
                     cap=f"tried {ev[0]['candidate'] or '?'} ({ev[0]['class']})", bg=RED))
                 return states
             num = (i0 + i + 1) // 2  # true move number, prefix included
@@ -281,8 +343,9 @@ def animate_combined(games: list[dict], out_path: Path, square: int = 34,
                                cap=f"{num}{dots} {ply['san']}  ({mover})", bg=BG))
         ev = [f for f in g["final_fails"] if f["class"] in ("illegal", "ambiguous")]
         if ev:
+            gfen, red = _event_ghost(states[-1]["fen"], ev, mover_white)
             states.append(dict(
-                fen=states[-1]["fen"], hl=None, red=_fail_squares(ev),
+                fen=gfen, hl=None, red=red,
                 cap=f"tried {ev[0]['candidate'] or '?'} ({ev[0]['class']})", bg=RED))
         else:
             states.append(dict(fen=states[-1]["fen"], hl=states[-1]["hl"],
