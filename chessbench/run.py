@@ -102,7 +102,8 @@ def make_llm(spec: GameSpec, args: argparse.Namespace):
         # own operating condition (CLI scaffolding, no temperature control,
         # tools disabled) — see ClaudeCodeClient. Keep volumes modest.
         return ClaudeCodeClient(model=spec.model.split(":", 1)[1],
-                                timeout=args.llm_timeout)
+                                timeout=args.llm_timeout,
+                                max_thinking_tokens=0 if args.no_think else None)
     return LiteLLMClient(
         model=spec.model,
         temperature=spec.temperature,
@@ -159,7 +160,8 @@ def main(argv: list[str] | None = None) -> int:
     p.add_argument("--llm-timeout", type=float, default=600.0,
                    help="per-request timeout in seconds; local thinking models can need minutes per move")
     p.add_argument("--no-think", action="store_true",
-                   help="append qwen-style /no_think to the system prompt (disables hybrid thinking)")
+                   help="disable extended thinking: qwen-style /no_think + native think=false for "
+                        "ollama, MAX_THINKING_TOKENS=0 for claude-code models")
     p.add_argument("--num-ctx", type=int, default=None,
                    help="ollama context window (its 4096 default silently truncates long thinking; "
                         "set >= prompt + max-tokens)")
@@ -243,7 +245,8 @@ def main(argv: list[str] | None = None) -> int:
             continue
         if model.startswith("claude-code:"):
             probe_llm = ClaudeCodeClient(model=model.split(":", 1)[1],
-                                         timeout=args.llm_timeout)
+                                         timeout=args.llm_timeout,
+                                         max_thinking_tokens=0 if args.no_think else None)
             try:
                 r = probe_llm.complete([{"role": "user", "content": "Reply with the single word: ready"}])
             except Exception as e:

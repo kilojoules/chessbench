@@ -140,7 +140,8 @@ class ClaudeCodeClient:
     no project CLAUDE.md or auto-memory is loaded (the user-level
     ~/.claude/CLAUDE.md, if any, still applies — keep it neutral)."""
 
-    def __init__(self, model: str, timeout: float = 300.0, workdir: str | None = None):
+    def __init__(self, model: str, timeout: float = 300.0, workdir: str | None = None,
+                 max_thinking_tokens: int | None = None):
         import tempfile
 
         self.model = model  # "sonnet", "opus", "haiku", or a full model id
@@ -148,6 +149,10 @@ class ClaudeCodeClient:
         self.workdir = workdir or tempfile.mkdtemp(prefix="chessbench-cc-")
         self.effective_temperature = None  # not controllable via the CLI
         self.num_ctx = None
+        # 0 disables extended thinking (~100x cheaper per move on hard
+        # positions: deployed Sonnet spends ~20k thinking tokens on a
+        # middlegame move). None leaves the CLI default (thinking on).
+        self.max_thinking_tokens = max_thinking_tokens
         self._session: str | None = None
 
     def _build_cmd(self, messages: list[dict]) -> tuple[list[str], str]:
@@ -173,11 +178,16 @@ class ClaudeCodeClient:
         import json as _json
         import subprocess
 
+        import os
+
         cmd, prompt = self._build_cmd(messages)
         fresh = "--resume" not in cmd
+        env = dict(os.environ)
+        if self.max_thinking_tokens is not None:
+            env["MAX_THINKING_TOKENS"] = str(self.max_thinking_tokens)
         t0 = time.monotonic()
         proc = subprocess.run(cmd, input=prompt, capture_output=True, text=True,
-                              timeout=self.timeout, cwd=self.workdir)
+                              timeout=self.timeout, cwd=self.workdir, env=env)
         latency_ms = int((time.monotonic() - t0) * 1000)
         if proc.returncode != 0:
             raise RuntimeError(f"claude -p failed (rc={proc.returncode}): {proc.stderr[:300]}")
