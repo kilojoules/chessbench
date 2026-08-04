@@ -120,6 +120,82 @@ class LiteLLMClient:
         )
 
 
+class ClaudeCodeClient:
+    """Frontier models through the Claude Code CLI (`claude -p`), using the
+    user's subscription auth instead of API billing.
+
+    This measures Claude INSIDE Claude Code's scaffolding: the CLI's system
+    wrapper surrounds the game prompt, sampling parameters are not
+    controllable (effective_temperature is recorded as None), and built-in
+    tools are disabled with --tools "" so the model cannot compute moves
+    with bash/python. Runs are their own operating condition — do not pool
+    them with bare-API rows. Subscription rate limits apply, and bulk
+    benchmarking through a consumer plan may sit outside its intended use;
+    check the plan's terms and keep volumes modest.
+
+    Sessions: each ply opens a fresh session (the harness supplies full
+    game history in the prompt, matching the API arms); format-retry
+    feedback resumes that ply's session to preserve conversation shape.
+    The working directory is an empty scratch dir outside any project, so
+    no project CLAUDE.md or auto-memory is loaded (the user-level
+    ~/.claude/CLAUDE.md, if any, still applies — keep it neutral)."""
+
+    def __init__(self, model: str, timeout: float = 300.0, workdir: str | None = None):
+        import tempfile
+
+        self.model = model  # "sonnet", "opus", "haiku", or a full model id
+        self.timeout = timeout
+        self.workdir = workdir or tempfile.mkdtemp(prefix="chessbench-cc-")
+        self.effective_temperature = None  # not controllable via the CLI
+        self.num_ctx = None
+        self._session: str | None = None
+
+    def _build_cmd(self, messages: list[dict]) -> tuple[list[str], str]:
+        system = next((m["content"] for m in messages if m["role"] == "system"), "")
+        prompt = messages[-1]["content"]
+        fresh = len([m for m in messages if m["role"] != "system"]) <= 1
+        cmd = ["claude", "-p", "--model", self.model, "--tools", "",
+               "--output-format", "json"]
+        if not fresh and self._session:
+            cmd += ["--resume", self._session]
+        else:
+            cmd += ["--system-prompt", system]
+            if not fresh:
+                # No session to resume: render the retry exchange inline.
+                convo = [m for m in messages if m["role"] != "system"]
+                prompt = "\n\n".join(
+                    ("[you replied]: " if m["role"] == "assistant" else "") + m["content"]
+                    for m in convo
+                )
+        return cmd, prompt
+
+    def complete(self, messages: list[dict], board: chess.Board | None = None) -> LLMResponse:
+        import json as _json
+        import subprocess
+
+        cmd, prompt = self._build_cmd(messages)
+        fresh = "--resume" not in cmd
+        t0 = time.monotonic()
+        proc = subprocess.run(cmd, input=prompt, capture_output=True, text=True,
+                              timeout=self.timeout, cwd=self.workdir)
+        latency_ms = int((time.monotonic() - t0) * 1000)
+        if proc.returncode != 0:
+            raise RuntimeError(f"claude -p failed (rc={proc.returncode}): {proc.stderr[:300]}")
+        data = _json.loads(proc.stdout)
+        if data.get("is_error"):
+            raise RuntimeError(f"claude -p returned an error: {str(data.get('result'))[:300]}")
+        if fresh:
+            self._session = data.get("session_id")
+        usage = data.get("usage", {})
+        return LLMResponse(
+            text=data.get("result") or "",
+            prompt_tokens=usage.get("input_tokens"),
+            output_tokens=usage.get("output_tokens"),
+            latency_ms=latency_ms,
+            finish_reason=data.get("stop_reason") or "stop",
+        )
+
+
 def _illegal_san(board: chess.Board) -> str:
     """A syntactically valid SAN move that is illegal in this position."""
     for sq in chess.SQUARE_NAMES:

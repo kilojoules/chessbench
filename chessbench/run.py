@@ -15,7 +15,7 @@ from pathlib import Path
 from .config import PROMPT_VERSION, STANDARD_SP_ID, VARIANTS, VISIBILITIES, EngineConfig, GameSpec
 from .engine import Engine
 from .game import play_game
-from .llm import FakeLLM, LiteLLMClient
+from .llm import ClaudeCodeClient, FakeLLM, LiteLLMClient
 from .positions import draw_chess960_positions, draw_offbook_prefixes
 
 VIS_SLUG = {"history-only": "blind", "history+board": "board"}
@@ -97,6 +97,12 @@ def make_llm(spec: GameSpec, args: argparse.Namespace):
         policy = spec.model.split(":", 1)[1]
         seed = zlib.crc32(spec.game_id.encode())
         return FakeLLM(policy=policy, seed=seed)
+    if spec.model.startswith("claude-code:"):
+        # Subscription-authenticated arm through the Claude Code CLI: its
+        # own operating condition (CLI scaffolding, no temperature control,
+        # tools disabled) — see ClaudeCodeClient. Keep volumes modest.
+        return ClaudeCodeClient(model=spec.model.split(":", 1)[1],
+                                timeout=args.llm_timeout)
     return LiteLLMClient(
         model=spec.model,
         temperature=spec.temperature,
@@ -234,6 +240,17 @@ def main(argv: list[str] | None = None) -> int:
     # empty bodies, which must never be graded as chess.
     for model in args.model:
         if model.startswith("fake:"):
+            continue
+        if model.startswith("claude-code:"):
+            probe_llm = ClaudeCodeClient(model=model.split(":", 1)[1],
+                                         timeout=args.llm_timeout)
+            try:
+                r = probe_llm.complete([{"role": "user", "content": "Reply with the single word: ready"}])
+            except Exception as e:
+                p.error(f"health probe failed for {model}: {type(e).__name__}: {e}")
+            if not r.text.strip():
+                p.error(f"health probe for {model} returned empty output")
+            print(f"[probe] {model} ok ({r.output_tokens} tokens, {r.latency_ms} ms)")
             continue
         probe_llm = LiteLLMClient(model=model, temperature=args.temperature,
                                   max_tokens=256, timeout=args.llm_timeout,
