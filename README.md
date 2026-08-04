@@ -210,6 +210,38 @@ standard-chess geometry twice as often. Full report:
 contribute several illegal attempts; under the current rule each game
 contributes at most one.)
 
+### claude-code:sonnet (thinking disabled) — the frontier tier
+
+30 games (5/cell) through the Claude Code CLI on subscription auth, with
+extended thinking disabled (`MAX_THINKING_TOKENS=0`); see the caveats in
+"Running it". Sonnet survives an order of magnitude longer than the local
+models and, at that depth, the design's effects sharpen dramatically:
+
+| Test | HR | 90% CI | p | Reading |
+|---|---:|:---:|---:|---|
+| chess960 | **14.35** | [7.32, 28.15] | 8e-11 | shuffled start raises per-move risk **14-fold** |
+| offbook | **4.43** | [2.35, 8.36] | .0001 | a random opening alone: **4.4-fold** |
+| blindfold | **1.24** | [1.14, 1.36] | 3e-05 | the sign **flips**: hiding the board now hurts |
+| blindfold × 960 (H4) | 2.80 | [0.88, 8.89] | .14 | positive as predicted, still underpowered at 5/cell |
+| plays Black (H1) | 0.52 | [0.30, 0.89] | .044 | a real color effect at this tier — not equivalent |
+
+Median moves to first illegal attempt: **16** (standard, blindfold) and 14
+(standard, board) vs **3–5** in chess960 — against qwen2.5:7b's 2–4
+everywhere. Two findings worth naming:
+
+- **The board-visibility sign flip.** At 7B, hiding the board was
+  (non-significantly) *protective*; at this tier it is significantly
+  *harmful* (HR 1.24). The crossover the benchmark was built to detect: a
+  model that can genuinely read a FEN benefits from being shown one, while
+  a weaker model only gets distracted by it.
+- **Geometry now costs more than the book.** For qwen2.5:7b, chess960 and
+  offbook were statistically indistinguishable (3.0 vs 3.3) — being
+  off-book explained everything. For Sonnet, chess960 (14.4) is more than
+  triple offbook (4.4): once a model is strong enough not to be broken by
+  novelty alone, the *unfamiliar geometry* becomes the dominant difficulty.
+
+Report: [docs/results/sonnet-nothink](docs/results/sonnet-nothink/report.md).
+
 ### qwen2.5:3b — below the benchmark's floor
 
 Median first event at move 1–2 in every cell; condition effects
