@@ -240,6 +240,17 @@ everywhere. Two findings worth naming:
   triple offbook (4.4): once a model is strong enough not to be broken by
   novelty alone, the *unfamiliar geometry* becomes the dominant difficulty.
 
+**The phantom-standard reflex does not vanish.** Both of Sonnet's
+chess960 phantoms were the same move — `Nf3` on move 2, once blindfolded
+and once *with the board printed in the prompt*. Raw counts aren't
+comparable across these runs (the halt rule caps each game at one illegal
+attempt, and deeper survival means longer histories, which the detector
+requires to replay from the standard start), so compare the rate among
+**detector-eligible** attempts: 10% at 3B (9/88), 34% at 7B (47/140),
+2/3 at Sonnet — the last with a 90% CI of [14%, 98%], i.e. consistent
+with anything. The phenomenon persists at frontier scale; quantifying it
+there needs far more chess960 games.
+
 Report: [docs/results/sonnet-nothink](docs/results/sonnet-nothink/report.md).
 
 ### qwen2.5:3b — below the benchmark's floor

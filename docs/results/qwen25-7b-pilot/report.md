@@ -87,6 +87,13 @@ _No context-overflow attempts detected._
 
 _`(phantom-standard)` counts chess960 illegal attempts that would have been LEGAL replaying the same movetext from the standard start — the direct signature of standard-geometry pattern matching. It is a conservative lower bound (the full history must replay from the standard array, so detection is biased toward the opening) and a structural zero outside chess960 (the reconstruction equals reality there), which makes the non-960 rows a built-in control. Both parenthesized classes are overlays on the base classes, so columns do not sum. `(stale-state)` counts attempts legal at a position 1–6 plies earlier — state-tracking lag; in board-shown cells these contradict the very board displayed in the prompt._
 
+
+**Phantom-standard rate, eligibility-corrected.** The detector requires the game history to replay from the standard start, so it goes blind once a real chess960 move breaks the replay — models that survive longer have lower eligibility. Compare the rate among ELIGIBLE attempts across models, not raw counts:
+
+| chess960 cell | illegal attempts | detector-eligible | phantom | rate of eligible |
+|---|---|---|---|---|
+| chess960 × history+board | 94 | 69 | 16 | 23% |
+| chess960 × history-only | 97 | 71 | 31 | 44% |
 ## Sensitivity: illegal-only events
 
 | cell | games | events | median event move |

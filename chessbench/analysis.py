@@ -564,6 +564,35 @@ def stale_state(a: dict, max_back: int = 6) -> bool:
     return False
 
 
+def phantom_eligible(a: dict) -> bool:
+    """Can the phantom detector even fire on this attempt? It requires the
+    game's history to replay from the standard start; once a real 960 move
+    breaks that, later attempts are undetectable regardless of what the
+    model imagined. Reporting the rate among ELIGIBLE attempts is the only
+    way to compare phantom rates across models that survive to different
+    depths (deeper survival -> longer histories -> lower eligibility)."""
+    board = chess.Board()
+    try:
+        for san in a["history"]:
+            board.push_san(san)
+    except ValueError:
+        return False
+    return True
+
+
+def phantom_rates(illegals: list[dict]) -> list[tuple]:
+    """(cell, n_illegal, n_eligible, n_phantom) for chess960 cells."""
+    out = []
+    for vis in ("history+board", "history-only"):
+        pool = [a for a in illegals if a["variant"] == "chess960" and a["visibility"] == vis]
+        if not pool:
+            continue
+        elig = [a for a in pool if phantom_eligible(a)]
+        ph = [a for a in elig if phantom_standard(a["history"], a["candidate"])]
+        out.append((f"chess960 × {vis}", len(pool), len(elig), len(ph)))
+    return out
+
+
 def taxonomy_table(illegals: list[dict]) -> dict:
     out: dict = {}
     for a in illegals:
@@ -697,6 +726,16 @@ def write_report(df, df_illonly, games: list[dict], illegals: list[dict],
                      "`(stale-state)` counts attempts legal at a position 1–6 plies earlier — "
                      "state-tracking lag; in board-shown cells these contradict the very board "
                      "displayed in the prompt._\n")
+        rates = phantom_rates(illegals)
+        if rates:
+            parts.append("\n**Phantom-standard rate, eligibility-corrected.** The detector "
+                         "requires the game history to replay from the standard start, so it "
+                         "goes blind once a real chess960 move breaks the replay — models that "
+                         "survive longer have lower eligibility. Compare the rate among "
+                         "ELIGIBLE attempts across models, not raw counts:\n")
+            parts.append(_md_table(
+                ["chess960 cell", "illegal attempts", "detector-eligible", "phantom", "rate of eligible"],
+                [[c, n, e, p, f"{p/e:.0%}" if e else "—"] for c, n, e, p in rates]))
     else:
         parts.append("_no illegal attempts logged_\n")
 
