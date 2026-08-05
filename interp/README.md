@@ -67,5 +67,30 @@ standard array.
 
 Predictions: **+α** strengthens the pull (illegal book moves climb, phantoms
 on demand); **−α** weakens it (the model stops preferring impossible moves).
-A null result would say this direction/layer isn't where the representation
-lives, and calls for a layer sweep rather than a stronger claim.
+
+### 3a. First run was a no-op (caught, not reported)
+
+The initial sweep returned byte-identical results at every α. That was not
+a null result: the hook added the vector at position `-1`, while
+`score_moves` reads logits at `[pre_len-1 : -1]` — the intervention landed
+on the one position never read. Fixed (steer all positions, α scaled to the
+measured residual norm), and the script now counts hook firings and
+**hard-warns if the α sweep fails to move scores**, so a silent no-op can
+never again be mistaken for a finding.
+
+### 3b. The corrected sweep looks like damage, not a direction
+
+With the hook working (effect spread 2.85), the α → phantom-pull curve is
+**non-monotonic and backwards**: α = −3/−2 *raise* the pull (book wins
+14/24), α = +2 *lowers* it (0/24), α = +3 raises it again (16/24). Large
+perturbations in either direction appear to degrade the position-specific
+computation, after which the model falls back on its prior — the opening
+book. That is a real effect, but a much weaker (and confounded) claim than
+"this direction encodes the standard board."
+
+**Controls now running**, because this is exactly where an interp result
+goes wrong: (i) a gentler α range, to find a regime where the model still
+functions; (ii) a **random unit vector of the same norm** — if random
+steering reproduces the U-shape, the effect is generic damage, not our
+direction; (iii) a health proxy (log-prob of the best *legal* move) logged
+at every α, so degradation is visible rather than inferred.

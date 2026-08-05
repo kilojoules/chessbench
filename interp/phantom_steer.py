@@ -82,6 +82,10 @@ def main() -> int:
     ap.add_argument("--n-vec", type=int, default=16, help="positions per contrast class")
     ap.add_argument("--alphas", default="-2,-1,0,1,2")
     ap.add_argument("--seed", type=int, default=7)
+    ap.add_argument("--control", choices=["none", "random"], default="none",
+                    help="'random': steer along a random unit vector of the same norm — "
+                         "the control that distinguishes a real directional effect from "
+                         "generic steering damage")
     ap.add_argument("--out", type=Path, default=Path("interp/steer_results.json"))
     args = ap.parse_args()
 
@@ -107,6 +111,11 @@ def main() -> int:
     vec = vec / vec.norm()
     # Scale alpha relative to the typical residual magnitude at this layer so
     # the sweep is meaningful regardless of model/layer.
+    if args.control == "random":
+        g = torch.Generator().manual_seed(args.seed)
+        vec = torch.randn(vec.shape[0], generator=g)
+        vec = vec / vec.norm()
+        print("CONTROL: steering along a RANDOM direction", flush=True)
     typical = torch.stack(neg_acts).norm(dim=1).mean().item()
     unit = 0.15 * typical
     print(f"vector dim {vec.shape[0]} | raw norm {raw_norm:.1f} | "
@@ -149,10 +158,13 @@ def main() -> int:
                 sc = score_moves(model, tok, prefix, cands)
                 order = [m for m, _ in sorted(sc.items(), key=lambda kv: -kv[1])]
                 rank = min(order.index(b) for b in illegal_book)
-                gap = max(sc[b] for b in illegal_book) - max(sc[m] for m in legal)
+                best_legal = max(sc[m] for m in legal)
+                gap = max(sc[b] for b in illegal_book) - best_legal
                 rows.append({"sp_id": sp, "visibility": visibility, "alpha": a,
                              "best_illegal_book_rank": rank, "book_minus_legal": gap,
-                             "top": order[0], "book_wins": order[0] in illegal_book})
+                             "best_legal_lp": best_legal,  # health proxy: collapses under damage
+                             "top": order[0], "book_wins": order[0] in illegal_book,
+                             "control": args.control})
             print(f"sp{sp:03d} {visibility:14s} " + " ".join(
                 f"a={r['alpha']:+.0f}:rank{r['best_illegal_book_rank']}"
                 for r in rows[-len(alphas):]), flush=True)
@@ -170,7 +182,9 @@ def main() -> int:
     print("\n=== steering effect (all positions pooled) ===")
     for a in alphas:
         sub = [r for r in rows if r["alpha"] == a]
-        print(f"alpha {a:+.0f}: median rank of best illegal book move "
+        print(f"alpha {a:+.1f}: health(best legal logprob) "
+              f"{statistics.mean(r['best_legal_lp'] for r in sub):+.3f} | "
+              f"median rank of best illegal book move "
               f"{statistics.median(r['best_illegal_book_rank'] for r in sub):.1f} | "
               f"mean logprob gap (book - best legal) {statistics.mean(r['book_minus_legal'] for r in sub):+.3f} | "
               f"illegal book wins outright: {sum(r['book_wins'] for r in sub)}/{len(sub)}")
