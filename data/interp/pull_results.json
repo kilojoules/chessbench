@@ -1,0 +1,1258 @@
+[
+  {
+    "variant": "standard",
+    "sp_id": 518,
+    "visibility": "history-only",
+    "top": "Nf3",
+    "book_ranks": {
+      "Nf3": 0,
+      "Nc3": 10,
+      "e4": 1,
+      "d4": 23,
+      "Bc4": 12,
+      "Bb5": 6,
+      "Nf6": 2,
+      "Nc6": 4,
+      "Qh5": 5,
+      "e5": 11,
+      "d5": 3
+    },
+    "illegal_book": []
+  },
+  {
+    "variant": "standard",
+    "sp_id": 518,
+    "visibility": "history+board",
+    "top": "Nf3",
+    "book_ranks": {
+      "Nf3": 0,
+      "Nc3": 13,
+      "e4": 1,
+      "d4": 11,
+      "Bc4": 19,
+      "Bb5": 6,
+      "Nf6": 2,
+      "Nc6": 4,
+      "Qh5": 5,
+      "e5": 10,
+      "d5": 3
+    },
+    "illegal_book": []
+  },
+  {
+    "variant": "chess960",
+    "sp_id": 2,
+    "visibility": "history-only",
+    "top": "e4",
+    "top_is_illegal_book": false,
+    "best_illegal_book": "Nf3",
+    "best_illegal_book_rank": 1,
+    "n_legal": 20,
+    "illegal_book": [
+      "Nf3",
+      "Bc4",
+      "Bb5",
+      "Nf6",
+      "Nc6",
+      "Qh5",
+      "e5",
+      "d5"
+    ]
+  },
+  {
+    "variant": "chess960",
+    "sp_id": 2,
+    "visibility": "history+board",
+    "top": "e4",
+    "top_is_illegal_book": false,
+    "best_illegal_book": "Nf6",
+    "best_illegal_book_rank": 1,
+    "n_legal": 20,
+    "illegal_book": [
+      "Nf3",
+      "Bc4",
+      "Bb5",
+      "Nf6",
+      "Nc6",
+      "Qh5",
+      "e5",
+      "d5"
+    ]
+  },
+  {
+    "variant": "chess960",
+    "sp_id": 82,
+    "visibility": "history-only",
+    "top": "e4",
+    "top_is_illegal_book": false,
+    "best_illegal_book": "Nf3",
+    "best_illegal_book_rank": 1,
+    "n_legal": 20,
+    "illegal_book": [
+      "Nf3",
+      "Bc4",
+      "Bb5",
+      "Nf6",
+      "Nc6",
+      "Qh5",
+      "e5",
+      "d5"
+    ]
+  },
+  {
+    "variant": "chess960",
+    "sp_id": 82,
+    "visibility": "history+board",
+    "top": "e4",
+    "top_is_illegal_book": false,
+    "best_illegal_book": "Nf3",
+    "best_illegal_book_rank": 1,
+    "n_legal": 20,
+    "illegal_book": [
+      "Nf3",
+      "Bc4",
+      "Bb5",
+      "Nf6",
+      "Nc6",
+      "Qh5",
+      "e5",
+      "d5"
+    ]
+  },
+  {
+    "variant": "chess960",
+    "sp_id": 105,
+    "visibility": "history-only",
+    "top": "e4",
+    "top_is_illegal_book": false,
+    "best_illegal_book": "Nf3",
+    "best_illegal_book_rank": 1,
+    "n_legal": 20,
+    "illegal_book": [
+      "Nf3",
+      "Bc4",
+      "Bb5",
+      "Nf6",
+      "Nc6",
+      "Qh5",
+      "e5",
+      "d5"
+    ]
+  },
+  {
+    "variant": "chess960",
+    "sp_id": 105,
+    "visibility": "history+board",
+    "top": "e4",
+    "top_is_illegal_book": false,
+    "best_illegal_book": "Nf3",
+    "best_illegal_book_rank": 1,
+    "n_legal": 20,
+    "illegal_book": [
+      "Nf3",
+      "Bc4",
+      "Bb5",
+      "Nf6",
+      "Nc6",
+      "Qh5",
+      "e5",
+      "d5"
+    ]
+  },
+  {
+    "variant": "chess960",
+    "sp_id": 121,
+    "visibility": "history-only",
+    "top": "e4",
+    "top_is_illegal_book": false,
+    "best_illegal_book": "Nf3",
+    "best_illegal_book_rank": 1,
+    "n_legal": 19,
+    "illegal_book": [
+      "Nf3",
+      "Nc3",
+      "Bc4",
+      "Bb5",
+      "Nf6",
+      "Nc6",
+      "Qh5",
+      "e5",
+      "d5"
+    ]
+  },
+  {
+    "variant": "chess960",
+    "sp_id": 121,
+    "visibility": "history+board",
+    "top": "Nf3",
+    "top_is_illegal_book": true,
+    "best_illegal_book": "Nf3",
+    "best_illegal_book_rank": 0,
+    "n_legal": 19,
+    "illegal_book": [
+      "Nf3",
+      "Nc3",
+      "Bc4",
+      "Bb5",
+      "Nf6",
+      "Nc6",
+      "Qh5",
+      "e5",
+      "d5"
+    ]
+  },
+  {
+    "variant": "chess960",
+    "sp_id": 228,
+    "visibility": "history-only",
+    "top": "e4",
+    "top_is_illegal_book": false,
+    "best_illegal_book": "Nf6",
+    "best_illegal_book_rank": 2,
+    "n_legal": 19,
+    "illegal_book": [
+      "Nc3",
+      "Bc4",
+      "Bb5",
+      "Nf6",
+      "Nc6",
+      "Qh5",
+      "e5",
+      "d5"
+    ]
+  },
+  {
+    "variant": "chess960",
+    "sp_id": 228,
+    "visibility": "history+board",
+    "top": "e4",
+    "top_is_illegal_book": false,
+    "best_illegal_book": "Nf6",
+    "best_illegal_book_rank": 2,
+    "n_legal": 19,
+    "illegal_book": [
+      "Nc3",
+      "Bc4",
+      "Bb5",
+      "Nf6",
+      "Nc6",
+      "Qh5",
+      "e5",
+      "d5"
+    ]
+  },
+  {
+    "variant": "chess960",
+    "sp_id": 245,
+    "visibility": "history-only",
+    "top": "e4",
+    "top_is_illegal_book": false,
+    "best_illegal_book": "Nf6",
+    "best_illegal_book_rank": 2,
+    "n_legal": 19,
+    "illegal_book": [
+      "Nc3",
+      "Bc4",
+      "Bb5",
+      "Nf6",
+      "Nc6",
+      "Qh5",
+      "e5",
+      "d5"
+    ]
+  },
+  {
+    "variant": "chess960",
+    "sp_id": 245,
+    "visibility": "history+board",
+    "top": "e4",
+    "top_is_illegal_book": false,
+    "best_illegal_book": "Nf6",
+    "best_illegal_book_rank": 2,
+    "n_legal": 19,
+    "illegal_book": [
+      "Nc3",
+      "Bc4",
+      "Bb5",
+      "Nf6",
+      "Nc6",
+      "Qh5",
+      "e5",
+      "d5"
+    ]
+  },
+  {
+    "variant": "chess960",
+    "sp_id": 327,
+    "visibility": "history-only",
+    "top": "e4",
+    "top_is_illegal_book": false,
+    "best_illegal_book": "Nf6",
+    "best_illegal_book_rank": 2,
+    "n_legal": 19,
+    "illegal_book": [
+      "Nc3",
+      "Bc4",
+      "Bb5",
+      "Nf6",
+      "Nc6",
+      "Qh5",
+      "e5",
+      "d5"
+    ]
+  },
+  {
+    "variant": "chess960",
+    "sp_id": 327,
+    "visibility": "history+board",
+    "top": "Nf3",
+    "top_is_illegal_book": false,
+    "best_illegal_book": "Nf6",
+    "best_illegal_book_rank": 2,
+    "n_legal": 19,
+    "illegal_book": [
+      "Nc3",
+      "Bc4",
+      "Bb5",
+      "Nf6",
+      "Nc6",
+      "Qh5",
+      "e5",
+      "d5"
+    ]
+  },
+  {
+    "variant": "chess960",
+    "sp_id": 430,
+    "visibility": "history-only",
+    "top": "e4",
+    "top_is_illegal_book": false,
+    "best_illegal_book": "Nf3",
+    "best_illegal_book_rank": 1,
+    "n_legal": 20,
+    "illegal_book": [
+      "Nf3",
+      "Nc3",
+      "Bc4",
+      "Bb5",
+      "Nf6",
+      "Nc6",
+      "Qh5",
+      "e5",
+      "d5"
+    ]
+  },
+  {
+    "variant": "chess960",
+    "sp_id": 430,
+    "visibility": "history+board",
+    "top": "e4",
+    "top_is_illegal_book": false,
+    "best_illegal_book": "Nf3",
+    "best_illegal_book_rank": 1,
+    "n_legal": 20,
+    "illegal_book": [
+      "Nf3",
+      "Nc3",
+      "Bc4",
+      "Bb5",
+      "Nf6",
+      "Nc6",
+      "Qh5",
+      "e5",
+      "d5"
+    ]
+  },
+  {
+    "variant": "chess960",
+    "sp_id": 451,
+    "visibility": "history-only",
+    "top": "e4",
+    "top_is_illegal_book": false,
+    "best_illegal_book": "Nf3",
+    "best_illegal_book_rank": 1,
+    "n_legal": 20,
+    "illegal_book": [
+      "Nf3",
+      "Bc4",
+      "Bb5",
+      "Nf6",
+      "Nc6",
+      "Qh5",
+      "e5",
+      "d5"
+    ]
+  },
+  {
+    "variant": "chess960",
+    "sp_id": 451,
+    "visibility": "history+board",
+    "top": "e4",
+    "top_is_illegal_book": false,
+    "best_illegal_book": "Nf3",
+    "best_illegal_book_rank": 1,
+    "n_legal": 20,
+    "illegal_book": [
+      "Nf3",
+      "Bc4",
+      "Bb5",
+      "Nf6",
+      "Nc6",
+      "Qh5",
+      "e5",
+      "d5"
+    ]
+  },
+  {
+    "variant": "chess960",
+    "sp_id": 502,
+    "visibility": "history-only",
+    "top": "e4",
+    "top_is_illegal_book": false,
+    "best_illegal_book": "d5",
+    "best_illegal_book_rank": 2,
+    "n_legal": 20,
+    "illegal_book": [
+      "Bc4",
+      "Bb5",
+      "Nf6",
+      "Nc6",
+      "Qh5",
+      "e5",
+      "d5"
+    ]
+  },
+  {
+    "variant": "chess960",
+    "sp_id": 502,
+    "visibility": "history+board",
+    "top": "e4",
+    "top_is_illegal_book": false,
+    "best_illegal_book": "Nf6",
+    "best_illegal_book_rank": 2,
+    "n_legal": 20,
+    "illegal_book": [
+      "Bc4",
+      "Bb5",
+      "Nf6",
+      "Nc6",
+      "Qh5",
+      "e5",
+      "d5"
+    ]
+  },
+  {
+    "variant": "chess960",
+    "sp_id": 514,
+    "visibility": "history-only",
+    "top": "e4",
+    "top_is_illegal_book": false,
+    "best_illegal_book": "d5",
+    "best_illegal_book_rank": 2,
+    "n_legal": 20,
+    "illegal_book": [
+      "Nc3",
+      "Bc4",
+      "Bb5",
+      "Nf6",
+      "Nc6",
+      "Qh5",
+      "e5",
+      "d5"
+    ]
+  },
+  {
+    "variant": "chess960",
+    "sp_id": 514,
+    "visibility": "history+board",
+    "top": "e4",
+    "top_is_illegal_book": false,
+    "best_illegal_book": "Nf6",
+    "best_illegal_book_rank": 2,
+    "n_legal": 20,
+    "illegal_book": [
+      "Nc3",
+      "Bc4",
+      "Bb5",
+      "Nf6",
+      "Nc6",
+      "Qh5",
+      "e5",
+      "d5"
+    ]
+  },
+  {
+    "variant": "chess960",
+    "sp_id": 525,
+    "visibility": "history-only",
+    "top": "e4",
+    "top_is_illegal_book": false,
+    "best_illegal_book": "Nf3",
+    "best_illegal_book_rank": 1,
+    "n_legal": 20,
+    "illegal_book": [
+      "Nf3",
+      "Bc4",
+      "Bb5",
+      "Nf6",
+      "Nc6",
+      "Qh5",
+      "e5",
+      "d5"
+    ]
+  },
+  {
+    "variant": "chess960",
+    "sp_id": 525,
+    "visibility": "history+board",
+    "top": "e4",
+    "top_is_illegal_book": false,
+    "best_illegal_book": "Nf3",
+    "best_illegal_book_rank": 1,
+    "n_legal": 20,
+    "illegal_book": [
+      "Nf3",
+      "Bc4",
+      "Bb5",
+      "Nf6",
+      "Nc6",
+      "Qh5",
+      "e5",
+      "d5"
+    ]
+  },
+  {
+    "variant": "chess960",
+    "sp_id": 561,
+    "visibility": "history-only",
+    "top": "e4",
+    "top_is_illegal_book": false,
+    "best_illegal_book": "Nf3",
+    "best_illegal_book_rank": 1,
+    "n_legal": 20,
+    "illegal_book": [
+      "Nf3",
+      "Nc3",
+      "Bc4",
+      "Bb5",
+      "Nf6",
+      "Nc6",
+      "Qh5",
+      "e5",
+      "d5"
+    ]
+  },
+  {
+    "variant": "chess960",
+    "sp_id": 561,
+    "visibility": "history+board",
+    "top": "e4",
+    "top_is_illegal_book": false,
+    "best_illegal_book": "Nf3",
+    "best_illegal_book_rank": 1,
+    "n_legal": 20,
+    "illegal_book": [
+      "Nf3",
+      "Nc3",
+      "Bc4",
+      "Bb5",
+      "Nf6",
+      "Nc6",
+      "Qh5",
+      "e5",
+      "d5"
+    ]
+  },
+  {
+    "variant": "chess960",
+    "sp_id": 570,
+    "visibility": "history-only",
+    "top": "e4",
+    "top_is_illegal_book": false,
+    "best_illegal_book": "Nf3",
+    "best_illegal_book_rank": 1,
+    "n_legal": 20,
+    "illegal_book": [
+      "Nf3",
+      "Nc3",
+      "Bc4",
+      "Bb5",
+      "Nf6",
+      "Nc6",
+      "Qh5",
+      "e5",
+      "d5"
+    ]
+  },
+  {
+    "variant": "chess960",
+    "sp_id": 570,
+    "visibility": "history+board",
+    "top": "e4",
+    "top_is_illegal_book": false,
+    "best_illegal_book": "Nf3",
+    "best_illegal_book_rank": 1,
+    "n_legal": 20,
+    "illegal_book": [
+      "Nf3",
+      "Nc3",
+      "Bc4",
+      "Bb5",
+      "Nf6",
+      "Nc6",
+      "Qh5",
+      "e5",
+      "d5"
+    ]
+  },
+  {
+    "variant": "chess960",
+    "sp_id": 587,
+    "visibility": "history-only",
+    "top": "e4",
+    "top_is_illegal_book": false,
+    "best_illegal_book": "d5",
+    "best_illegal_book_rank": 2,
+    "n_legal": 20,
+    "illegal_book": [
+      "Nc3",
+      "Bc4",
+      "Bb5",
+      "Nf6",
+      "Nc6",
+      "Qh5",
+      "e5",
+      "d5"
+    ]
+  },
+  {
+    "variant": "chess960",
+    "sp_id": 587,
+    "visibility": "history+board",
+    "top": "e4",
+    "top_is_illegal_book": false,
+    "best_illegal_book": "Nf6",
+    "best_illegal_book_rank": 2,
+    "n_legal": 20,
+    "illegal_book": [
+      "Nc3",
+      "Bc4",
+      "Bb5",
+      "Nf6",
+      "Nc6",
+      "Qh5",
+      "e5",
+      "d5"
+    ]
+  },
+  {
+    "variant": "chess960",
+    "sp_id": 601,
+    "visibility": "history-only",
+    "top": "e4",
+    "top_is_illegal_book": false,
+    "best_illegal_book": "Nf3",
+    "best_illegal_book_rank": 1,
+    "n_legal": 20,
+    "illegal_book": [
+      "Nf3",
+      "Nc3",
+      "Bc4",
+      "Bb5",
+      "Nf6",
+      "Nc6",
+      "Qh5",
+      "e5",
+      "d5"
+    ]
+  },
+  {
+    "variant": "chess960",
+    "sp_id": 601,
+    "visibility": "history+board",
+    "top": "e4",
+    "top_is_illegal_book": false,
+    "best_illegal_book": "Nf3",
+    "best_illegal_book_rank": 1,
+    "n_legal": 20,
+    "illegal_book": [
+      "Nf3",
+      "Nc3",
+      "Bc4",
+      "Bb5",
+      "Nf6",
+      "Nc6",
+      "Qh5",
+      "e5",
+      "d5"
+    ]
+  },
+  {
+    "variant": "chess960",
+    "sp_id": 616,
+    "visibility": "history-only",
+    "top": "e4",
+    "top_is_illegal_book": false,
+    "best_illegal_book": "Nf3",
+    "best_illegal_book_rank": 1,
+    "n_legal": 20,
+    "illegal_book": [
+      "Nf3",
+      "Nc3",
+      "Bc4",
+      "Bb5",
+      "Nf6",
+      "Nc6",
+      "Qh5",
+      "e5",
+      "d5"
+    ]
+  },
+  {
+    "variant": "chess960",
+    "sp_id": 616,
+    "visibility": "history+board",
+    "top": "e4",
+    "top_is_illegal_book": false,
+    "best_illegal_book": "Nf3",
+    "best_illegal_book_rank": 1,
+    "n_legal": 20,
+    "illegal_book": [
+      "Nf3",
+      "Nc3",
+      "Bc4",
+      "Bb5",
+      "Nf6",
+      "Nc6",
+      "Qh5",
+      "e5",
+      "d5"
+    ]
+  },
+  {
+    "variant": "chess960",
+    "sp_id": 629,
+    "visibility": "history-only",
+    "top": "e4",
+    "top_is_illegal_book": false,
+    "best_illegal_book": "Nf3",
+    "best_illegal_book_rank": 1,
+    "n_legal": 19,
+    "illegal_book": [
+      "Nf3",
+      "Bc4",
+      "Bb5",
+      "Nf6",
+      "Nc6",
+      "Qh5",
+      "e5",
+      "d5"
+    ]
+  },
+  {
+    "variant": "chess960",
+    "sp_id": 629,
+    "visibility": "history+board",
+    "top": "e4",
+    "top_is_illegal_book": false,
+    "best_illegal_book": "Nf3",
+    "best_illegal_book_rank": 1,
+    "n_legal": 19,
+    "illegal_book": [
+      "Nf3",
+      "Bc4",
+      "Bb5",
+      "Nf6",
+      "Nc6",
+      "Qh5",
+      "e5",
+      "d5"
+    ]
+  },
+  {
+    "variant": "chess960",
+    "sp_id": 637,
+    "visibility": "history-only",
+    "top": "e4",
+    "top_is_illegal_book": false,
+    "best_illegal_book": "Nf3",
+    "best_illegal_book_rank": 1,
+    "n_legal": 19,
+    "illegal_book": [
+      "Nf3",
+      "Bc4",
+      "Bb5",
+      "Nf6",
+      "Nc6",
+      "Qh5",
+      "e5",
+      "d5"
+    ]
+  },
+  {
+    "variant": "chess960",
+    "sp_id": 637,
+    "visibility": "history+board",
+    "top": "e4",
+    "top_is_illegal_book": false,
+    "best_illegal_book": "Nf3",
+    "best_illegal_book_rank": 1,
+    "n_legal": 19,
+    "illegal_book": [
+      "Nf3",
+      "Bc4",
+      "Bb5",
+      "Nf6",
+      "Nc6",
+      "Qh5",
+      "e5",
+      "d5"
+    ]
+  },
+  {
+    "variant": "chess960",
+    "sp_id": 663,
+    "visibility": "history-only",
+    "top": "e4",
+    "top_is_illegal_book": false,
+    "best_illegal_book": "Nf3",
+    "best_illegal_book_rank": 1,
+    "n_legal": 20,
+    "illegal_book": [
+      "Nf3",
+      "Bc4",
+      "Bb5",
+      "Nf6",
+      "Nc6",
+      "Qh5",
+      "e5",
+      "d5"
+    ]
+  },
+  {
+    "variant": "chess960",
+    "sp_id": 663,
+    "visibility": "history+board",
+    "top": "e4",
+    "top_is_illegal_book": false,
+    "best_illegal_book": "Nf3",
+    "best_illegal_book_rank": 1,
+    "n_legal": 20,
+    "illegal_book": [
+      "Nf3",
+      "Bc4",
+      "Bb5",
+      "Nf6",
+      "Nc6",
+      "Qh5",
+      "e5",
+      "d5"
+    ]
+  },
+  {
+    "variant": "chess960",
+    "sp_id": 749,
+    "visibility": "history-only",
+    "top": "e4",
+    "top_is_illegal_book": false,
+    "best_illegal_book": "d5",
+    "best_illegal_book_rank": 2,
+    "n_legal": 20,
+    "illegal_book": [
+      "Nc3",
+      "Bc4",
+      "Bb5",
+      "Nf6",
+      "Nc6",
+      "Qh5",
+      "e5",
+      "d5"
+    ]
+  },
+  {
+    "variant": "chess960",
+    "sp_id": 749,
+    "visibility": "history+board",
+    "top": "e4",
+    "top_is_illegal_book": false,
+    "best_illegal_book": "Nf6",
+    "best_illegal_book_rank": 2,
+    "n_legal": 20,
+    "illegal_book": [
+      "Nc3",
+      "Bc4",
+      "Bb5",
+      "Nf6",
+      "Nc6",
+      "Qh5",
+      "e5",
+      "d5"
+    ]
+  },
+  {
+    "variant": "chess960",
+    "sp_id": 770,
+    "visibility": "history-only",
+    "top": "e4",
+    "top_is_illegal_book": false,
+    "best_illegal_book": "d5",
+    "best_illegal_book_rank": 2,
+    "n_legal": 20,
+    "illegal_book": [
+      "Nc3",
+      "Bc4",
+      "Bb5",
+      "Nf6",
+      "Nc6",
+      "Qh5",
+      "e5",
+      "d5"
+    ]
+  },
+  {
+    "variant": "chess960",
+    "sp_id": 770,
+    "visibility": "history+board",
+    "top": "e4",
+    "top_is_illegal_book": false,
+    "best_illegal_book": "Nf6",
+    "best_illegal_book_rank": 2,
+    "n_legal": 20,
+    "illegal_book": [
+      "Nc3",
+      "Bc4",
+      "Bb5",
+      "Nf6",
+      "Nc6",
+      "Qh5",
+      "e5",
+      "d5"
+    ]
+  },
+  {
+    "variant": "chess960",
+    "sp_id": 787,
+    "visibility": "history-only",
+    "top": "e4",
+    "top_is_illegal_book": false,
+    "best_illegal_book": "Nf3",
+    "best_illegal_book_rank": 1,
+    "n_legal": 20,
+    "illegal_book": [
+      "Nf3",
+      "Nc3",
+      "Bc4",
+      "Bb5",
+      "Nf6",
+      "Nc6",
+      "Qh5",
+      "e5",
+      "d5"
+    ]
+  },
+  {
+    "variant": "chess960",
+    "sp_id": 787,
+    "visibility": "history+board",
+    "top": "e4",
+    "top_is_illegal_book": false,
+    "best_illegal_book": "Nf3",
+    "best_illegal_book_rank": 1,
+    "n_legal": 20,
+    "illegal_book": [
+      "Nf3",
+      "Nc3",
+      "Bc4",
+      "Bb5",
+      "Nf6",
+      "Nc6",
+      "Qh5",
+      "e5",
+      "d5"
+    ]
+  },
+  {
+    "variant": "chess960",
+    "sp_id": 792,
+    "visibility": "history-only",
+    "top": "e4",
+    "top_is_illegal_book": false,
+    "best_illegal_book": "Nf3",
+    "best_illegal_book_rank": 1,
+    "n_legal": 19,
+    "illegal_book": [
+      "Nf3",
+      "Nc3",
+      "Bc4",
+      "Bb5",
+      "Nf6",
+      "Nc6",
+      "Qh5",
+      "e5",
+      "d5"
+    ]
+  },
+  {
+    "variant": "chess960",
+    "sp_id": 792,
+    "visibility": "history+board",
+    "top": "e4",
+    "top_is_illegal_book": false,
+    "best_illegal_book": "Nf3",
+    "best_illegal_book_rank": 1,
+    "n_legal": 19,
+    "illegal_book": [
+      "Nf3",
+      "Nc3",
+      "Bc4",
+      "Bb5",
+      "Nf6",
+      "Nc6",
+      "Qh5",
+      "e5",
+      "d5"
+    ]
+  },
+  {
+    "variant": "chess960",
+    "sp_id": 796,
+    "visibility": "history-only",
+    "top": "e4",
+    "top_is_illegal_book": false,
+    "best_illegal_book": "Nf6",
+    "best_illegal_book_rank": 2,
+    "n_legal": 19,
+    "illegal_book": [
+      "Nc3",
+      "Bc4",
+      "Bb5",
+      "Nf6",
+      "Nc6",
+      "Qh5",
+      "e5",
+      "d5"
+    ]
+  },
+  {
+    "variant": "chess960",
+    "sp_id": 796,
+    "visibility": "history+board",
+    "top": "e4",
+    "top_is_illegal_book": false,
+    "best_illegal_book": "Nf6",
+    "best_illegal_book_rank": 2,
+    "n_legal": 19,
+    "illegal_book": [
+      "Nc3",
+      "Bc4",
+      "Bb5",
+      "Nf6",
+      "Nc6",
+      "Qh5",
+      "e5",
+      "d5"
+    ]
+  },
+  {
+    "variant": "chess960",
+    "sp_id": 803,
+    "visibility": "history-only",
+    "top": "e4",
+    "top_is_illegal_book": false,
+    "best_illegal_book": "Nf3",
+    "best_illegal_book_rank": 1,
+    "n_legal": 20,
+    "illegal_book": [
+      "Nf3",
+      "Nc3",
+      "Bc4",
+      "Bb5",
+      "Nf6",
+      "Nc6",
+      "Qh5",
+      "e5",
+      "d5"
+    ]
+  },
+  {
+    "variant": "chess960",
+    "sp_id": 803,
+    "visibility": "history+board",
+    "top": "e4",
+    "top_is_illegal_book": false,
+    "best_illegal_book": "Nf3",
+    "best_illegal_book_rank": 1,
+    "n_legal": 20,
+    "illegal_book": [
+      "Nf3",
+      "Nc3",
+      "Bc4",
+      "Bb5",
+      "Nf6",
+      "Nc6",
+      "Qh5",
+      "e5",
+      "d5"
+    ]
+  },
+  {
+    "variant": "chess960",
+    "sp_id": 863,
+    "visibility": "history-only",
+    "top": "e4",
+    "top_is_illegal_book": false,
+    "best_illegal_book": "Nf6",
+    "best_illegal_book_rank": 2,
+    "n_legal": 20,
+    "illegal_book": [
+      "Nc3",
+      "Bc4",
+      "Bb5",
+      "Nf6",
+      "Nc6",
+      "Qh5",
+      "e5",
+      "d5"
+    ]
+  },
+  {
+    "variant": "chess960",
+    "sp_id": 863,
+    "visibility": "history+board",
+    "top": "e4",
+    "top_is_illegal_book": false,
+    "best_illegal_book": "Nf6",
+    "best_illegal_book_rank": 2,
+    "n_legal": 20,
+    "illegal_book": [
+      "Nc3",
+      "Bc4",
+      "Bb5",
+      "Nf6",
+      "Nc6",
+      "Qh5",
+      "e5",
+      "d5"
+    ]
+  },
+  {
+    "variant": "chess960",
+    "sp_id": 881,
+    "visibility": "history-only",
+    "top": "e4",
+    "top_is_illegal_book": false,
+    "best_illegal_book": "Nf6",
+    "best_illegal_book_rank": 2,
+    "n_legal": 19,
+    "illegal_book": [
+      "Nc3",
+      "Bc4",
+      "Bb5",
+      "Nf6",
+      "Nc6",
+      "Qh5",
+      "e5",
+      "d5"
+    ]
+  },
+  {
+    "variant": "chess960",
+    "sp_id": 881,
+    "visibility": "history+board",
+    "top": "Nf3",
+    "top_is_illegal_book": false,
+    "best_illegal_book": "Nf6",
+    "best_illegal_book_rank": 2,
+    "n_legal": 19,
+    "illegal_book": [
+      "Nc3",
+      "Bc4",
+      "Bb5",
+      "Nf6",
+      "Nc6",
+      "Qh5",
+      "e5",
+      "d5"
+    ]
+  },
+  {
+    "variant": "chess960",
+    "sp_id": 906,
+    "visibility": "history-only",
+    "top": "e4",
+    "top_is_illegal_book": false,
+    "best_illegal_book": "Nf6",
+    "best_illegal_book_rank": 2,
+    "n_legal": 19,
+    "illegal_book": [
+      "Nc3",
+      "Bc4",
+      "Bb5",
+      "Nf6",
+      "Nc6",
+      "Qh5",
+      "e5",
+      "d5"
+    ]
+  },
+  {
+    "variant": "chess960",
+    "sp_id": 906,
+    "visibility": "history+board",
+    "top": "e4",
+    "top_is_illegal_book": false,
+    "best_illegal_book": "Nf6",
+    "best_illegal_book_rank": 2,
+    "n_legal": 19,
+    "illegal_book": [
+      "Nc3",
+      "Bc4",
+      "Bb5",
+      "Nf6",
+      "Nc6",
+      "Qh5",
+      "e5",
+      "d5"
+    ]
+  },
+  {
+    "variant": "chess960",
+    "sp_id": 917,
+    "visibility": "history-only",
+    "top": "e4",
+    "top_is_illegal_book": false,
+    "best_illegal_book": "Nf6",
+    "best_illegal_book_rank": 2,
+    "n_legal": 19,
+    "illegal_book": [
+      "Nc3",
+      "Bc4",
+      "Bb5",
+      "Nf6",
+      "Nc6",
+      "Qh5",
+      "e5",
+      "d5"
+    ]
+  },
+  {
+    "variant": "chess960",
+    "sp_id": 917,
+    "visibility": "history+board",
+    "top": "e4",
+    "top_is_illegal_book": false,
+    "best_illegal_book": "Nf6",
+    "best_illegal_book_rank": 2,
+    "n_legal": 19,
+    "illegal_book": [
+      "Nc3",
+      "Bc4",
+      "Bb5",
+      "Nf6",
+      "Nc6",
+      "Qh5",
+      "e5",
+      "d5"
+    ]
+  }
+]
