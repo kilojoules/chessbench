@@ -1,0 +1,338 @@
+[
+  {
+    "sp_id": 105,
+    "visibility": "history-only",
+    "candidate": "e4",
+    "parse_class": "legal",
+    "phantom": false
+  },
+  {
+    "sp_id": 121,
+    "visibility": "history-only",
+    "candidate": "Nf6",
+    "parse_class": "illegal",
+    "phantom": false
+  },
+  {
+    "sp_id": 228,
+    "visibility": "history-only",
+    "candidate": "e4",
+    "parse_class": "legal",
+    "phantom": false
+  },
+  {
+    "sp_id": 327,
+    "visibility": "history-only",
+    "candidate": "Nfa2",
+    "parse_class": "illegal",
+    "phantom": false
+  },
+  {
+    "sp_id": 430,
+    "visibility": "history-only",
+    "candidate": "Nf3",
+    "parse_class": "illegal",
+    "phantom": true
+  },
+  {
+    "sp_id": 502,
+    "visibility": "history-only",
+    "candidate": "e2-e4",
+    "parse_class": "legal",
+    "phantom": false
+  },
+  {
+    "sp_id": 514,
+    "visibility": "history-only",
+    "candidate": "e2-e4",
+    "parse_class": "legal",
+    "phantom": false
+  },
+  {
+    "sp_id": 525,
+    "visibility": "history-only",
+    "candidate": "e2-e4",
+    "parse_class": "legal",
+    "phantom": false
+  },
+  {
+    "sp_id": 561,
+    "visibility": "history-only",
+    "candidate": "e4",
+    "parse_class": "legal",
+    "phantom": false
+  },
+  {
+    "sp_id": 570,
+    "visibility": "history-only",
+    "candidate": "Nf3",
+    "parse_class": "illegal",
+    "phantom": true
+  },
+  {
+    "sp_id": 587,
+    "visibility": "history-only",
+    "candidate": "Nf3",
+    "parse_class": "legal",
+    "phantom": false
+  },
+  {
+    "sp_id": 616,
+    "visibility": "history-only",
+    "candidate": "Nf3",
+    "parse_class": "illegal",
+    "phantom": true
+  },
+  {
+    "sp_id": 637,
+    "visibility": "history-only",
+    "candidate": "e4",
+    "parse_class": "legal",
+    "phantom": false
+  },
+  {
+    "sp_id": 663,
+    "visibility": "history-only",
+    "candidate": "Nf3",
+    "parse_class": "illegal",
+    "phantom": true
+  },
+  {
+    "sp_id": 749,
+    "visibility": "history-only",
+    "candidate": "e2-e4",
+    "parse_class": "legal",
+    "phantom": false
+  },
+  {
+    "sp_id": 770,
+    "visibility": "history-only",
+    "candidate": "e4",
+    "parse_class": "legal",
+    "phantom": false
+  },
+  {
+    "sp_id": 787,
+    "visibility": "history-only",
+    "candidate": "Nf3",
+    "parse_class": "ambiguous",
+    "phantom": false
+  },
+  {
+    "sp_id": 792,
+    "visibility": "history-only",
+    "candidate": "Nd5",
+    "parse_class": "illegal",
+    "phantom": false
+  },
+  {
+    "sp_id": 796,
+    "visibility": "history-only",
+    "candidate": null,
+    "parse_class": "invalid",
+    "phantom": false
+  },
+  {
+    "sp_id": 803,
+    "visibility": "history-only",
+    "candidate": "Nd2",
+    "parse_class": "illegal",
+    "phantom": false
+  },
+  {
+    "sp_id": 863,
+    "visibility": "history-only",
+    "candidate": null,
+    "parse_class": "invalid",
+    "phantom": false
+  },
+  {
+    "sp_id": 881,
+    "visibility": "history-only",
+    "candidate": "Nef3",
+    "parse_class": "illegal",
+    "phantom": false
+  },
+  {
+    "sp_id": 906,
+    "visibility": "history-only",
+    "candidate": "Nf3",
+    "parse_class": "legal",
+    "phantom": false
+  },
+  {
+    "sp_id": 917,
+    "visibility": "history-only",
+    "candidate": "e4",
+    "parse_class": "legal",
+    "phantom": false
+  },
+  {
+    "sp_id": 105,
+    "visibility": "history+board",
+    "candidate": "e2-e4",
+    "parse_class": "legal",
+    "phantom": false
+  },
+  {
+    "sp_id": 121,
+    "visibility": "history+board",
+    "candidate": "O-O",
+    "parse_class": "illegal",
+    "phantom": false
+  },
+  {
+    "sp_id": 228,
+    "visibility": "history+board",
+    "candidate": "O-O",
+    "parse_class": "illegal",
+    "phantom": false
+  },
+  {
+    "sp_id": 327,
+    "visibility": "history+board",
+    "candidate": "O-O",
+    "parse_class": "illegal",
+    "phantom": false
+  },
+  {
+    "sp_id": 430,
+    "visibility": "history+board",
+    "candidate": "O-O",
+    "parse_class": "illegal",
+    "phantom": false
+  },
+  {
+    "sp_id": 502,
+    "visibility": "history+board",
+    "candidate": "e2-e4",
+    "parse_class": "legal",
+    "phantom": false
+  },
+  {
+    "sp_id": 514,
+    "visibility": "history+board",
+    "candidate": "O-O",
+    "parse_class": "illegal",
+    "phantom": false
+  },
+  {
+    "sp_id": 525,
+    "visibility": "history+board",
+    "candidate": "O-O",
+    "parse_class": "illegal",
+    "phantom": false
+  },
+  {
+    "sp_id": 561,
+    "visibility": "history+board",
+    "candidate": "O-O",
+    "parse_class": "illegal",
+    "phantom": false
+  },
+  {
+    "sp_id": 570,
+    "visibility": "history+board",
+    "candidate": "O-O",
+    "parse_class": "illegal",
+    "phantom": false
+  },
+  {
+    "sp_id": 587,
+    "visibility": "history+board",
+    "candidate": "e2-e4",
+    "parse_class": "legal",
+    "phantom": false
+  },
+  {
+    "sp_id": 616,
+    "visibility": "history+board",
+    "candidate": "e2-e4",
+    "parse_class": "legal",
+    "phantom": false
+  },
+  {
+    "sp_id": 637,
+    "visibility": "history+board",
+    "candidate": "O-O",
+    "parse_class": "illegal",
+    "phantom": false
+  },
+  {
+    "sp_id": 663,
+    "visibility": "history+board",
+    "candidate": "O-O",
+    "parse_class": "illegal",
+    "phantom": false
+  },
+  {
+    "sp_id": 749,
+    "visibility": "history+board",
+    "candidate": "O-O",
+    "parse_class": "illegal",
+    "phantom": false
+  },
+  {
+    "sp_id": 770,
+    "visibility": "history+board",
+    "candidate": "O-O",
+    "parse_class": "illegal",
+    "phantom": false
+  },
+  {
+    "sp_id": 787,
+    "visibility": "history+board",
+    "candidate": "e2-e4",
+    "parse_class": "legal",
+    "phantom": false
+  },
+  {
+    "sp_id": 792,
+    "visibility": "history+board",
+    "candidate": "O-O",
+    "parse_class": "illegal",
+    "phantom": false
+  },
+  {
+    "sp_id": 796,
+    "visibility": "history+board",
+    "candidate": "O-O",
+    "parse_class": "illegal",
+    "phantom": false
+  },
+  {
+    "sp_id": 803,
+    "visibility": "history+board",
+    "candidate": "e2-e4",
+    "parse_class": "legal",
+    "phantom": false
+  },
+  {
+    "sp_id": 863,
+    "visibility": "history+board",
+    "candidate": "O-O",
+    "parse_class": "illegal",
+    "phantom": false
+  },
+  {
+    "sp_id": 881,
+    "visibility": "history+board",
+    "candidate": "O-O",
+    "parse_class": "illegal",
+    "phantom": false
+  },
+  {
+    "sp_id": 906,
+    "visibility": "history+board",
+    "candidate": "O-O",
+    "parse_class": "illegal",
+    "phantom": false
+  },
+  {
+    "sp_id": 917,
+    "visibility": "history+board",
+    "candidate": "O-O",
+    "parse_class": "illegal",
+    "phantom": false
+  }
+]
