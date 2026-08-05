@@ -103,17 +103,31 @@ def main() -> int:
             n, _ = build_prefix(tok, sp, visibility)
             neg_acts.append(last_token_resid(model, tok, n, args.layer))
     vec = torch.stack(pos_acts).mean(0) - torch.stack(neg_acts).mean(0)
+    raw_norm = vec.norm().item()
     vec = vec / vec.norm()
-    print(f"vector norm-1, dim {vec.shape[0]}", flush=True)
+    # Scale alpha relative to the typical residual magnitude at this layer so
+    # the sweep is meaningful regardless of model/layer.
+    typical = torch.stack(neg_acts).norm(dim=1).mean().item()
+    unit = 0.15 * typical
+    print(f"vector dim {vec.shape[0]} | raw norm {raw_norm:.1f} | "
+          f"typical resid norm {typical:.1f} | alpha unit {unit:.1f}", flush=True)
 
     # ---- steer and re-score ----
     handle = None
     scale = [0.0]
 
+    fired = [0]
+
     def hook(_mod, _inp, out):
+        # Steer EVERY position, not just the last one: score_moves reads
+        # logits at [pre_len-1 : -1], so an intervention applied only at the
+        # final position lands on the one slot that is never read (this bug
+        # produced a perfectly flat alpha sweep on the first run).
         h = out[0] if isinstance(out, tuple) else out
-        h[:, -1, :] = h[:, -1, :] + scale[0] * vec.to(h.device, h.dtype)
-        return (h,) + out[1:] if isinstance(out, tuple) else h
+        if scale[0] != 0.0:
+            h[:] = h + scale[0] * vec.to(h.device, h.dtype)
+            fired[0] += 1
+        return ((h,) + out[1:]) if isinstance(out, tuple) else h
 
     layer_mod = model.model.layers[args.layer]
     handle = layer_mod.register_forward_hook(hook)
@@ -131,7 +145,7 @@ def main() -> int:
             cands = sorted(set(legal + illegal_book))
             for a in alphas:
                 # residual norms are ~50-100; scale alpha by a typical norm
-                scale[0] = a * 8.0
+                scale[0] = a * unit
                 sc = score_moves(model, tok, prefix, cands)
                 order = [m for m, _ in sorted(sc.items(), key=lambda kv: -kv[1])]
                 rank = min(order.index(b) for b in illegal_book)
@@ -143,6 +157,14 @@ def main() -> int:
                 f"a={r['alpha']:+.0f}:rank{r['best_illegal_book_rank']}"
                 for r in rows[-len(alphas):]), flush=True)
     handle.remove()
+
+    # Guard against a silent no-op: the alpha sweep must actually move scores.
+    gaps = {a: [r["book_minus_legal"] for r in rows if r["alpha"] == a] for a in alphas}
+    spread = max(statistics.mean(v) for v in gaps.values()) - min(statistics.mean(v) for v in gaps.values())
+    print(f"\nhook fired {fired[0]} times | mean-gap spread across alpha: {spread:.4f}")
+    if spread < 1e-6:
+        print("WARNING: steering had NO measurable effect — the intervention is "
+              "not reaching the scored logits. Do not interpret this as a null result.")
 
     args.out.write_text(json.dumps(rows, indent=2))
     print("\n=== steering effect (all positions pooled) ===")

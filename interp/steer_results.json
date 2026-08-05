@@ -1,0 +1,1082 @@
+[
+  {
+    "sp_id": 63,
+    "visibility": "history-only",
+    "alpha": -2.0,
+    "best_illegal_book_rank": 1,
+    "book_minus_legal": -0.8633499145507812,
+    "top": "e4",
+    "book_wins": false
+  },
+  {
+    "sp_id": 63,
+    "visibility": "history-only",
+    "alpha": -1.0,
+    "best_illegal_book_rank": 1,
+    "book_minus_legal": -0.8633499145507812,
+    "top": "e4",
+    "book_wins": false
+  },
+  {
+    "sp_id": 63,
+    "visibility": "history-only",
+    "alpha": 0.0,
+    "best_illegal_book_rank": 1,
+    "book_minus_legal": -0.8633499145507812,
+    "top": "e4",
+    "book_wins": false
+  },
+  {
+    "sp_id": 63,
+    "visibility": "history-only",
+    "alpha": 1.0,
+    "best_illegal_book_rank": 1,
+    "book_minus_legal": -0.8633499145507812,
+    "top": "e4",
+    "book_wins": false
+  },
+  {
+    "sp_id": 63,
+    "visibility": "history-only",
+    "alpha": 2.0,
+    "best_illegal_book_rank": 1,
+    "book_minus_legal": -0.8633499145507812,
+    "top": "e4",
+    "book_wins": false
+  },
+  {
+    "sp_id": 63,
+    "visibility": "history+board",
+    "alpha": -2.0,
+    "best_illegal_book_rank": 0,
+    "book_minus_legal": 0.6345558166503906,
+    "top": "Nf3",
+    "book_wins": true
+  },
+  {
+    "sp_id": 63,
+    "visibility": "history+board",
+    "alpha": -1.0,
+    "best_illegal_book_rank": 0,
+    "book_minus_legal": 0.6345558166503906,
+    "top": "Nf3",
+    "book_wins": true
+  },
+  {
+    "sp_id": 63,
+    "visibility": "history+board",
+    "alpha": 0.0,
+    "best_illegal_book_rank": 0,
+    "book_minus_legal": 0.6345558166503906,
+    "top": "Nf3",
+    "book_wins": true
+  },
+  {
+    "sp_id": 63,
+    "visibility": "history+board",
+    "alpha": 1.0,
+    "best_illegal_book_rank": 0,
+    "book_minus_legal": 0.6345558166503906,
+    "top": "Nf3",
+    "book_wins": true
+  },
+  {
+    "sp_id": 63,
+    "visibility": "history+board",
+    "alpha": 2.0,
+    "best_illegal_book_rank": 0,
+    "book_minus_legal": 0.6345558166503906,
+    "top": "Nf3",
+    "book_wins": true
+  },
+  {
+    "sp_id": 75,
+    "visibility": "history-only",
+    "alpha": -2.0,
+    "best_illegal_book_rank": 1,
+    "book_minus_legal": -0.3660390377044678,
+    "top": "e4",
+    "book_wins": false
+  },
+  {
+    "sp_id": 75,
+    "visibility": "history-only",
+    "alpha": -1.0,
+    "best_illegal_book_rank": 1,
+    "book_minus_legal": -0.3660390377044678,
+    "top": "e4",
+    "book_wins": false
+  },
+  {
+    "sp_id": 75,
+    "visibility": "history-only",
+    "alpha": 0.0,
+    "best_illegal_book_rank": 1,
+    "book_minus_legal": -0.3660390377044678,
+    "top": "e4",
+    "book_wins": false
+  },
+  {
+    "sp_id": 75,
+    "visibility": "history-only",
+    "alpha": 1.0,
+    "best_illegal_book_rank": 1,
+    "book_minus_legal": -0.3660390377044678,
+    "top": "e4",
+    "book_wins": false
+  },
+  {
+    "sp_id": 75,
+    "visibility": "history-only",
+    "alpha": 2.0,
+    "best_illegal_book_rank": 1,
+    "book_minus_legal": -0.3660390377044678,
+    "top": "e4",
+    "book_wins": false
+  },
+  {
+    "sp_id": 75,
+    "visibility": "history+board",
+    "alpha": -2.0,
+    "best_illegal_book_rank": 0,
+    "book_minus_legal": 0.41470813751220703,
+    "top": "Nf3",
+    "book_wins": true
+  },
+  {
+    "sp_id": 75,
+    "visibility": "history+board",
+    "alpha": -1.0,
+    "best_illegal_book_rank": 0,
+    "book_minus_legal": 0.41470813751220703,
+    "top": "Nf3",
+    "book_wins": true
+  },
+  {
+    "sp_id": 75,
+    "visibility": "history+board",
+    "alpha": 0.0,
+    "best_illegal_book_rank": 0,
+    "book_minus_legal": 0.41470813751220703,
+    "top": "Nf3",
+    "book_wins": true
+  },
+  {
+    "sp_id": 75,
+    "visibility": "history+board",
+    "alpha": 1.0,
+    "best_illegal_book_rank": 0,
+    "book_minus_legal": 0.41470813751220703,
+    "top": "Nf3",
+    "book_wins": true
+  },
+  {
+    "sp_id": 75,
+    "visibility": "history+board",
+    "alpha": 2.0,
+    "best_illegal_book_rank": 0,
+    "book_minus_legal": 0.41470813751220703,
+    "top": "Nf3",
+    "book_wins": true
+  },
+  {
+    "sp_id": 92,
+    "visibility": "history-only",
+    "alpha": -2.0,
+    "best_illegal_book_rank": 1,
+    "book_minus_legal": -0.40398335456848145,
+    "top": "e4",
+    "book_wins": false
+  },
+  {
+    "sp_id": 92,
+    "visibility": "history-only",
+    "alpha": -1.0,
+    "best_illegal_book_rank": 1,
+    "book_minus_legal": -0.40398335456848145,
+    "top": "e4",
+    "book_wins": false
+  },
+  {
+    "sp_id": 92,
+    "visibility": "history-only",
+    "alpha": 0.0,
+    "best_illegal_book_rank": 1,
+    "book_minus_legal": -0.40398335456848145,
+    "top": "e4",
+    "book_wins": false
+  },
+  {
+    "sp_id": 92,
+    "visibility": "history-only",
+    "alpha": 1.0,
+    "best_illegal_book_rank": 1,
+    "book_minus_legal": -0.40398335456848145,
+    "top": "e4",
+    "book_wins": false
+  },
+  {
+    "sp_id": 92,
+    "visibility": "history-only",
+    "alpha": 2.0,
+    "best_illegal_book_rank": 1,
+    "book_minus_legal": -0.40398335456848145,
+    "top": "e4",
+    "book_wins": false
+  },
+  {
+    "sp_id": 92,
+    "visibility": "history+board",
+    "alpha": -2.0,
+    "best_illegal_book_rank": 1,
+    "book_minus_legal": -0.509347677230835,
+    "top": "e4",
+    "book_wins": false
+  },
+  {
+    "sp_id": 92,
+    "visibility": "history+board",
+    "alpha": -1.0,
+    "best_illegal_book_rank": 1,
+    "book_minus_legal": -0.509347677230835,
+    "top": "e4",
+    "book_wins": false
+  },
+  {
+    "sp_id": 92,
+    "visibility": "history+board",
+    "alpha": 0.0,
+    "best_illegal_book_rank": 1,
+    "book_minus_legal": -0.509347677230835,
+    "top": "e4",
+    "book_wins": false
+  },
+  {
+    "sp_id": 92,
+    "visibility": "history+board",
+    "alpha": 1.0,
+    "best_illegal_book_rank": 1,
+    "book_minus_legal": -0.509347677230835,
+    "top": "e4",
+    "book_wins": false
+  },
+  {
+    "sp_id": 92,
+    "visibility": "history+board",
+    "alpha": 2.0,
+    "best_illegal_book_rank": 1,
+    "book_minus_legal": -0.509347677230835,
+    "top": "e4",
+    "book_wins": false
+  },
+  {
+    "sp_id": 97,
+    "visibility": "history-only",
+    "alpha": -2.0,
+    "best_illegal_book_rank": 1,
+    "book_minus_legal": -1.2466766834259033,
+    "top": "e4",
+    "book_wins": false
+  },
+  {
+    "sp_id": 97,
+    "visibility": "history-only",
+    "alpha": -1.0,
+    "best_illegal_book_rank": 1,
+    "book_minus_legal": -1.2466766834259033,
+    "top": "e4",
+    "book_wins": false
+  },
+  {
+    "sp_id": 97,
+    "visibility": "history-only",
+    "alpha": 0.0,
+    "best_illegal_book_rank": 1,
+    "book_minus_legal": -1.2466766834259033,
+    "top": "e4",
+    "book_wins": false
+  },
+  {
+    "sp_id": 97,
+    "visibility": "history-only",
+    "alpha": 1.0,
+    "best_illegal_book_rank": 1,
+    "book_minus_legal": -1.2466766834259033,
+    "top": "e4",
+    "book_wins": false
+  },
+  {
+    "sp_id": 97,
+    "visibility": "history-only",
+    "alpha": 2.0,
+    "best_illegal_book_rank": 1,
+    "book_minus_legal": -1.2466766834259033,
+    "top": "e4",
+    "book_wins": false
+  },
+  {
+    "sp_id": 97,
+    "visibility": "history+board",
+    "alpha": -2.0,
+    "best_illegal_book_rank": 1,
+    "book_minus_legal": -1.1102447509765625,
+    "top": "e4",
+    "book_wins": false
+  },
+  {
+    "sp_id": 97,
+    "visibility": "history+board",
+    "alpha": -1.0,
+    "best_illegal_book_rank": 1,
+    "book_minus_legal": -1.1102447509765625,
+    "top": "e4",
+    "book_wins": false
+  },
+  {
+    "sp_id": 97,
+    "visibility": "history+board",
+    "alpha": 0.0,
+    "best_illegal_book_rank": 1,
+    "book_minus_legal": -1.1102447509765625,
+    "top": "e4",
+    "book_wins": false
+  },
+  {
+    "sp_id": 97,
+    "visibility": "history+board",
+    "alpha": 1.0,
+    "best_illegal_book_rank": 1,
+    "book_minus_legal": -1.1102447509765625,
+    "top": "e4",
+    "book_wins": false
+  },
+  {
+    "sp_id": 97,
+    "visibility": "history+board",
+    "alpha": 2.0,
+    "best_illegal_book_rank": 1,
+    "book_minus_legal": -1.1102447509765625,
+    "top": "e4",
+    "book_wins": false
+  },
+  {
+    "sp_id": 131,
+    "visibility": "history-only",
+    "alpha": -2.0,
+    "best_illegal_book_rank": 2,
+    "book_minus_legal": -2.338052749633789,
+    "top": "e4",
+    "book_wins": false
+  },
+  {
+    "sp_id": 131,
+    "visibility": "history-only",
+    "alpha": -1.0,
+    "best_illegal_book_rank": 2,
+    "book_minus_legal": -2.338052749633789,
+    "top": "e4",
+    "book_wins": false
+  },
+  {
+    "sp_id": 131,
+    "visibility": "history-only",
+    "alpha": 0.0,
+    "best_illegal_book_rank": 2,
+    "book_minus_legal": -2.338052749633789,
+    "top": "e4",
+    "book_wins": false
+  },
+  {
+    "sp_id": 131,
+    "visibility": "history-only",
+    "alpha": 1.0,
+    "best_illegal_book_rank": 2,
+    "book_minus_legal": -2.338052749633789,
+    "top": "e4",
+    "book_wins": false
+  },
+  {
+    "sp_id": 131,
+    "visibility": "history-only",
+    "alpha": 2.0,
+    "best_illegal_book_rank": 2,
+    "book_minus_legal": -2.338052749633789,
+    "top": "e4",
+    "book_wins": false
+  },
+  {
+    "sp_id": 131,
+    "visibility": "history+board",
+    "alpha": -2.0,
+    "best_illegal_book_rank": 2,
+    "book_minus_legal": -1.8109641075134277,
+    "top": "e4",
+    "book_wins": false
+  },
+  {
+    "sp_id": 131,
+    "visibility": "history+board",
+    "alpha": -1.0,
+    "best_illegal_book_rank": 2,
+    "book_minus_legal": -1.8109641075134277,
+    "top": "e4",
+    "book_wins": false
+  },
+  {
+    "sp_id": 131,
+    "visibility": "history+board",
+    "alpha": 0.0,
+    "best_illegal_book_rank": 2,
+    "book_minus_legal": -1.8109641075134277,
+    "top": "e4",
+    "book_wins": false
+  },
+  {
+    "sp_id": 131,
+    "visibility": "history+board",
+    "alpha": 1.0,
+    "best_illegal_book_rank": 2,
+    "book_minus_legal": -1.8109641075134277,
+    "top": "e4",
+    "book_wins": false
+  },
+  {
+    "sp_id": 131,
+    "visibility": "history+board",
+    "alpha": 2.0,
+    "best_illegal_book_rank": 2,
+    "book_minus_legal": -1.8109641075134277,
+    "top": "e4",
+    "book_wins": false
+  },
+  {
+    "sp_id": 253,
+    "visibility": "history-only",
+    "alpha": -2.0,
+    "best_illegal_book_rank": 1,
+    "book_minus_legal": -1.0114233493804932,
+    "top": "e4",
+    "book_wins": false
+  },
+  {
+    "sp_id": 253,
+    "visibility": "history-only",
+    "alpha": -1.0,
+    "best_illegal_book_rank": 1,
+    "book_minus_legal": -1.0114233493804932,
+    "top": "e4",
+    "book_wins": false
+  },
+  {
+    "sp_id": 253,
+    "visibility": "history-only",
+    "alpha": 0.0,
+    "best_illegal_book_rank": 1,
+    "book_minus_legal": -1.0114233493804932,
+    "top": "e4",
+    "book_wins": false
+  },
+  {
+    "sp_id": 253,
+    "visibility": "history-only",
+    "alpha": 1.0,
+    "best_illegal_book_rank": 1,
+    "book_minus_legal": -1.0114233493804932,
+    "top": "e4",
+    "book_wins": false
+  },
+  {
+    "sp_id": 253,
+    "visibility": "history-only",
+    "alpha": 2.0,
+    "best_illegal_book_rank": 1,
+    "book_minus_legal": -1.0114233493804932,
+    "top": "e4",
+    "book_wins": false
+  },
+  {
+    "sp_id": 253,
+    "visibility": "history+board",
+    "alpha": -2.0,
+    "best_illegal_book_rank": 1,
+    "book_minus_legal": -0.45023107528686523,
+    "top": "e4",
+    "book_wins": false
+  },
+  {
+    "sp_id": 253,
+    "visibility": "history+board",
+    "alpha": -1.0,
+    "best_illegal_book_rank": 1,
+    "book_minus_legal": -0.45023107528686523,
+    "top": "e4",
+    "book_wins": false
+  },
+  {
+    "sp_id": 253,
+    "visibility": "history+board",
+    "alpha": 0.0,
+    "best_illegal_book_rank": 1,
+    "book_minus_legal": -0.45023107528686523,
+    "top": "e4",
+    "book_wins": false
+  },
+  {
+    "sp_id": 253,
+    "visibility": "history+board",
+    "alpha": 1.0,
+    "best_illegal_book_rank": 1,
+    "book_minus_legal": -0.45023107528686523,
+    "top": "e4",
+    "book_wins": false
+  },
+  {
+    "sp_id": 253,
+    "visibility": "history+board",
+    "alpha": 2.0,
+    "best_illegal_book_rank": 1,
+    "book_minus_legal": -0.45023107528686523,
+    "top": "e4",
+    "book_wins": false
+  },
+  {
+    "sp_id": 438,
+    "visibility": "history-only",
+    "alpha": -2.0,
+    "best_illegal_book_rank": 1,
+    "book_minus_legal": -1.5949492454528809,
+    "top": "e4",
+    "book_wins": false
+  },
+  {
+    "sp_id": 438,
+    "visibility": "history-only",
+    "alpha": -1.0,
+    "best_illegal_book_rank": 1,
+    "book_minus_legal": -1.5949492454528809,
+    "top": "e4",
+    "book_wins": false
+  },
+  {
+    "sp_id": 438,
+    "visibility": "history-only",
+    "alpha": 0.0,
+    "best_illegal_book_rank": 1,
+    "book_minus_legal": -1.5949492454528809,
+    "top": "e4",
+    "book_wins": false
+  },
+  {
+    "sp_id": 438,
+    "visibility": "history-only",
+    "alpha": 1.0,
+    "best_illegal_book_rank": 1,
+    "book_minus_legal": -1.5949492454528809,
+    "top": "e4",
+    "book_wins": false
+  },
+  {
+    "sp_id": 438,
+    "visibility": "history-only",
+    "alpha": 2.0,
+    "best_illegal_book_rank": 1,
+    "book_minus_legal": -1.5949492454528809,
+    "top": "e4",
+    "book_wins": false
+  },
+  {
+    "sp_id": 438,
+    "visibility": "history+board",
+    "alpha": -2.0,
+    "best_illegal_book_rank": 1,
+    "book_minus_legal": -0.4964156150817871,
+    "top": "e4",
+    "book_wins": false
+  },
+  {
+    "sp_id": 438,
+    "visibility": "history+board",
+    "alpha": -1.0,
+    "best_illegal_book_rank": 1,
+    "book_minus_legal": -0.4964156150817871,
+    "top": "e4",
+    "book_wins": false
+  },
+  {
+    "sp_id": 438,
+    "visibility": "history+board",
+    "alpha": 0.0,
+    "best_illegal_book_rank": 1,
+    "book_minus_legal": -0.4964156150817871,
+    "top": "e4",
+    "book_wins": false
+  },
+  {
+    "sp_id": 438,
+    "visibility": "history+board",
+    "alpha": 1.0,
+    "best_illegal_book_rank": 1,
+    "book_minus_legal": -0.4964156150817871,
+    "top": "e4",
+    "book_wins": false
+  },
+  {
+    "sp_id": 438,
+    "visibility": "history+board",
+    "alpha": 2.0,
+    "best_illegal_book_rank": 1,
+    "book_minus_legal": -0.4964156150817871,
+    "top": "e4",
+    "book_wins": false
+  },
+  {
+    "sp_id": 444,
+    "visibility": "history-only",
+    "alpha": -2.0,
+    "best_illegal_book_rank": 1,
+    "book_minus_legal": -0.8699824810028076,
+    "top": "e4",
+    "book_wins": false
+  },
+  {
+    "sp_id": 444,
+    "visibility": "history-only",
+    "alpha": -1.0,
+    "best_illegal_book_rank": 1,
+    "book_minus_legal": -0.8699824810028076,
+    "top": "e4",
+    "book_wins": false
+  },
+  {
+    "sp_id": 444,
+    "visibility": "history-only",
+    "alpha": 0.0,
+    "best_illegal_book_rank": 1,
+    "book_minus_legal": -0.8699824810028076,
+    "top": "e4",
+    "book_wins": false
+  },
+  {
+    "sp_id": 444,
+    "visibility": "history-only",
+    "alpha": 1.0,
+    "best_illegal_book_rank": 1,
+    "book_minus_legal": -0.8699824810028076,
+    "top": "e4",
+    "book_wins": false
+  },
+  {
+    "sp_id": 444,
+    "visibility": "history-only",
+    "alpha": 2.0,
+    "best_illegal_book_rank": 1,
+    "book_minus_legal": -0.8699824810028076,
+    "top": "e4",
+    "book_wins": false
+  },
+  {
+    "sp_id": 444,
+    "visibility": "history+board",
+    "alpha": -2.0,
+    "best_illegal_book_rank": 1,
+    "book_minus_legal": -0.4996638298034668,
+    "top": "e4",
+    "book_wins": false
+  },
+  {
+    "sp_id": 444,
+    "visibility": "history+board",
+    "alpha": -1.0,
+    "best_illegal_book_rank": 1,
+    "book_minus_legal": -0.4996638298034668,
+    "top": "e4",
+    "book_wins": false
+  },
+  {
+    "sp_id": 444,
+    "visibility": "history+board",
+    "alpha": 0.0,
+    "best_illegal_book_rank": 1,
+    "book_minus_legal": -0.4996638298034668,
+    "top": "e4",
+    "book_wins": false
+  },
+  {
+    "sp_id": 444,
+    "visibility": "history+board",
+    "alpha": 1.0,
+    "best_illegal_book_rank": 1,
+    "book_minus_legal": -0.4996638298034668,
+    "top": "e4",
+    "book_wins": false
+  },
+  {
+    "sp_id": 444,
+    "visibility": "history+board",
+    "alpha": 2.0,
+    "best_illegal_book_rank": 1,
+    "book_minus_legal": -0.4996638298034668,
+    "top": "e4",
+    "book_wins": false
+  },
+  {
+    "sp_id": 454,
+    "visibility": "history-only",
+    "alpha": -2.0,
+    "best_illegal_book_rank": 1,
+    "book_minus_legal": -1.3540971279144287,
+    "top": "e4",
+    "book_wins": false
+  },
+  {
+    "sp_id": 454,
+    "visibility": "history-only",
+    "alpha": -1.0,
+    "best_illegal_book_rank": 1,
+    "book_minus_legal": -1.3540971279144287,
+    "top": "e4",
+    "book_wins": false
+  },
+  {
+    "sp_id": 454,
+    "visibility": "history-only",
+    "alpha": 0.0,
+    "best_illegal_book_rank": 1,
+    "book_minus_legal": -1.3540971279144287,
+    "top": "e4",
+    "book_wins": false
+  },
+  {
+    "sp_id": 454,
+    "visibility": "history-only",
+    "alpha": 1.0,
+    "best_illegal_book_rank": 1,
+    "book_minus_legal": -1.3540971279144287,
+    "top": "e4",
+    "book_wins": false
+  },
+  {
+    "sp_id": 454,
+    "visibility": "history-only",
+    "alpha": 2.0,
+    "best_illegal_book_rank": 1,
+    "book_minus_legal": -1.3540971279144287,
+    "top": "e4",
+    "book_wins": false
+  },
+  {
+    "sp_id": 454,
+    "visibility": "history+board",
+    "alpha": -2.0,
+    "best_illegal_book_rank": 1,
+    "book_minus_legal": -0.6443934440612793,
+    "top": "e4",
+    "book_wins": false
+  },
+  {
+    "sp_id": 454,
+    "visibility": "history+board",
+    "alpha": -1.0,
+    "best_illegal_book_rank": 1,
+    "book_minus_legal": -0.6443934440612793,
+    "top": "e4",
+    "book_wins": false
+  },
+  {
+    "sp_id": 454,
+    "visibility": "history+board",
+    "alpha": 0.0,
+    "best_illegal_book_rank": 1,
+    "book_minus_legal": -0.6443934440612793,
+    "top": "e4",
+    "book_wins": false
+  },
+  {
+    "sp_id": 454,
+    "visibility": "history+board",
+    "alpha": 1.0,
+    "best_illegal_book_rank": 1,
+    "book_minus_legal": -0.6443934440612793,
+    "top": "e4",
+    "book_wins": false
+  },
+  {
+    "sp_id": 454,
+    "visibility": "history+board",
+    "alpha": 2.0,
+    "best_illegal_book_rank": 1,
+    "book_minus_legal": -0.6443934440612793,
+    "top": "e4",
+    "book_wins": false
+  },
+  {
+    "sp_id": 577,
+    "visibility": "history-only",
+    "alpha": -2.0,
+    "best_illegal_book_rank": 2,
+    "book_minus_legal": -1.5392155647277832,
+    "top": "e4",
+    "book_wins": false
+  },
+  {
+    "sp_id": 577,
+    "visibility": "history-only",
+    "alpha": -1.0,
+    "best_illegal_book_rank": 2,
+    "book_minus_legal": -1.5392155647277832,
+    "top": "e4",
+    "book_wins": false
+  },
+  {
+    "sp_id": 577,
+    "visibility": "history-only",
+    "alpha": 0.0,
+    "best_illegal_book_rank": 2,
+    "book_minus_legal": -1.5392155647277832,
+    "top": "e4",
+    "book_wins": false
+  },
+  {
+    "sp_id": 577,
+    "visibility": "history-only",
+    "alpha": 1.0,
+    "best_illegal_book_rank": 2,
+    "book_minus_legal": -1.5392155647277832,
+    "top": "e4",
+    "book_wins": false
+  },
+  {
+    "sp_id": 577,
+    "visibility": "history-only",
+    "alpha": 2.0,
+    "best_illegal_book_rank": 2,
+    "book_minus_legal": -1.5392155647277832,
+    "top": "e4",
+    "book_wins": false
+  },
+  {
+    "sp_id": 577,
+    "visibility": "history+board",
+    "alpha": -2.0,
+    "best_illegal_book_rank": 1,
+    "book_minus_legal": -1.3086326122283936,
+    "top": "e4",
+    "book_wins": false
+  },
+  {
+    "sp_id": 577,
+    "visibility": "history+board",
+    "alpha": -1.0,
+    "best_illegal_book_rank": 1,
+    "book_minus_legal": -1.3086326122283936,
+    "top": "e4",
+    "book_wins": false
+  },
+  {
+    "sp_id": 577,
+    "visibility": "history+board",
+    "alpha": 0.0,
+    "best_illegal_book_rank": 1,
+    "book_minus_legal": -1.3086326122283936,
+    "top": "e4",
+    "book_wins": false
+  },
+  {
+    "sp_id": 577,
+    "visibility": "history+board",
+    "alpha": 1.0,
+    "best_illegal_book_rank": 1,
+    "book_minus_legal": -1.3086326122283936,
+    "top": "e4",
+    "book_wins": false
+  },
+  {
+    "sp_id": 577,
+    "visibility": "history+board",
+    "alpha": 2.0,
+    "best_illegal_book_rank": 1,
+    "book_minus_legal": -1.3086326122283936,
+    "top": "e4",
+    "book_wins": false
+  },
+  {
+    "sp_id": 592,
+    "visibility": "history-only",
+    "alpha": -2.0,
+    "best_illegal_book_rank": 2,
+    "book_minus_legal": -1.8013525009155273,
+    "top": "e4",
+    "book_wins": false
+  },
+  {
+    "sp_id": 592,
+    "visibility": "history-only",
+    "alpha": -1.0,
+    "best_illegal_book_rank": 2,
+    "book_minus_legal": -1.8013525009155273,
+    "top": "e4",
+    "book_wins": false
+  },
+  {
+    "sp_id": 592,
+    "visibility": "history-only",
+    "alpha": 0.0,
+    "best_illegal_book_rank": 2,
+    "book_minus_legal": -1.8013525009155273,
+    "top": "e4",
+    "book_wins": false
+  },
+  {
+    "sp_id": 592,
+    "visibility": "history-only",
+    "alpha": 1.0,
+    "best_illegal_book_rank": 2,
+    "book_minus_legal": -1.8013525009155273,
+    "top": "e4",
+    "book_wins": false
+  },
+  {
+    "sp_id": 592,
+    "visibility": "history-only",
+    "alpha": 2.0,
+    "best_illegal_book_rank": 2,
+    "book_minus_legal": -1.8013525009155273,
+    "top": "e4",
+    "book_wins": false
+  },
+  {
+    "sp_id": 592,
+    "visibility": "history+board",
+    "alpha": -2.0,
+    "best_illegal_book_rank": 2,
+    "book_minus_legal": -1.5023689270019531,
+    "top": "e4",
+    "book_wins": false
+  },
+  {
+    "sp_id": 592,
+    "visibility": "history+board",
+    "alpha": -1.0,
+    "best_illegal_book_rank": 2,
+    "book_minus_legal": -1.5023689270019531,
+    "top": "e4",
+    "book_wins": false
+  },
+  {
+    "sp_id": 592,
+    "visibility": "history+board",
+    "alpha": 0.0,
+    "best_illegal_book_rank": 2,
+    "book_minus_legal": -1.5023689270019531,
+    "top": "e4",
+    "book_wins": false
+  },
+  {
+    "sp_id": 592,
+    "visibility": "history+board",
+    "alpha": 1.0,
+    "best_illegal_book_rank": 2,
+    "book_minus_legal": -1.5023689270019531,
+    "top": "e4",
+    "book_wins": false
+  },
+  {
+    "sp_id": 592,
+    "visibility": "history+board",
+    "alpha": 2.0,
+    "best_illegal_book_rank": 2,
+    "book_minus_legal": -1.5023689270019531,
+    "top": "e4",
+    "book_wins": false
+  },
+  {
+    "sp_id": 862,
+    "visibility": "history-only",
+    "alpha": -2.0,
+    "best_illegal_book_rank": 2,
+    "book_minus_legal": -2.0130105018615723,
+    "top": "e4",
+    "book_wins": false
+  },
+  {
+    "sp_id": 862,
+    "visibility": "history-only",
+    "alpha": -1.0,
+    "best_illegal_book_rank": 2,
+    "book_minus_legal": -2.0130105018615723,
+    "top": "e4",
+    "book_wins": false
+  },
+  {
+    "sp_id": 862,
+    "visibility": "history-only",
+    "alpha": 0.0,
+    "best_illegal_book_rank": 2,
+    "book_minus_legal": -2.0130105018615723,
+    "top": "e4",
+    "book_wins": false
+  },
+  {
+    "sp_id": 862,
+    "visibility": "history-only",
+    "alpha": 1.0,
+    "best_illegal_book_rank": 2,
+    "book_minus_legal": -2.0130105018615723,
+    "top": "e4",
+    "book_wins": false
+  },
+  {
+    "sp_id": 862,
+    "visibility": "history-only",
+    "alpha": 2.0,
+    "best_illegal_book_rank": 2,
+    "book_minus_legal": -2.0130105018615723,
+    "top": "e4",
+    "book_wins": false
+  },
+  {
+    "sp_id": 862,
+    "visibility": "history+board",
+    "alpha": -2.0,
+    "best_illegal_book_rank": 2,
+    "book_minus_legal": -1.8026890754699707,
+    "top": "e4",
+    "book_wins": false
+  },
+  {
+    "sp_id": 862,
+    "visibility": "history+board",
+    "alpha": -1.0,
+    "best_illegal_book_rank": 2,
+    "book_minus_legal": -1.8026890754699707,
+    "top": "e4",
+    "book_wins": false
+  },
+  {
+    "sp_id": 862,
+    "visibility": "history+board",
+    "alpha": 0.0,
+    "best_illegal_book_rank": 2,
+    "book_minus_legal": -1.8026890754699707,
+    "top": "e4",
+    "book_wins": false
+  },
+  {
+    "sp_id": 862,
+    "visibility": "history+board",
+    "alpha": 1.0,
+    "best_illegal_book_rank": 2,
+    "book_minus_legal": -1.8026890754699707,
+    "top": "e4",
+    "book_wins": false
+  },
+  {
+    "sp_id": 862,
+    "visibility": "history+board",
+    "alpha": 2.0,
+    "best_illegal_book_rank": 2,
+    "book_minus_legal": -1.8026890754699707,
+    "top": "e4",
+    "book_wins": false
+  }
+]
