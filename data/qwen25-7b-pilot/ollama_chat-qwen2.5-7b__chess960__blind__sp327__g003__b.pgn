@@ -1,0 +1,12 @@
+[Event "chessbench chess960 / history-only"]
+[Site "ollama_chat-qwen2.5-7b__chess960__blind__sp327__g003__b"]
+[Date "????.??.??"]
+[Round "?"]
+[White "Stockfish 18"]
+[Black "ollama_chat/qwen2.5:7b"]
+[Result "1-0"]
+[FEN "nrbqkrnb/pppppppp/8/8/8/8/PPPPPPPP/NRBQKRNB w KQkq - 0 1"]
+[SetUp "1"]
+[Variant "Chess960"]
+
+1. b4 e5 2. b5 e4 3. g3 Nf6 4. Ba3 d6 5. Bb2 1-0

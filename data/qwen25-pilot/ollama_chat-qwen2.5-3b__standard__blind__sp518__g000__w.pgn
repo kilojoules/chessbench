@@ -1,0 +1,9 @@
+[Event "chessbench standard / history-only"]
+[Site "ollama_chat-qwen2.5-3b__standard__blind__sp518__g000__w"]
+[Date "????.??.??"]
+[Round "?"]
+[White "ollama_chat/qwen2.5:3b"]
+[Black "Stockfish 18"]
+[Result "0-1"]
+
+1. e4 e5 0-1

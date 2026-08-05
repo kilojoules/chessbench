@@ -1,0 +1,81 @@
+{
+  "argv": [
+    "--out",
+    "runs/qwen25-pilot",
+    "--model",
+    "ollama_chat/qwen2.5:3b",
+    "--games-per-cell",
+    "20",
+    "--variant",
+    "all",
+    "--max-plies",
+    "40",
+    "--nodes",
+    "2000",
+    "--max-tokens",
+    "2048",
+    "--num-ctx",
+    "6144",
+    "--llm-timeout",
+    "120",
+    "--temperature",
+    "0.7",
+    "--parallel",
+    "2"
+  ],
+  "models": [
+    "ollama_chat/qwen2.5:3b"
+  ],
+  "variants": [
+    "standard",
+    "chess960",
+    "standard-offbook"
+  ],
+  "visibilities": [
+    "history-only",
+    "history+board"
+  ],
+  "games_per_cell": 20,
+  "chess960_positions": [
+    105,
+    121,
+    228,
+    327,
+    514,
+    525,
+    663,
+    881,
+    906,
+    917
+  ],
+  "position_seed": 2026,
+  "offbook_prefixes": [
+    "Nc3 g5 a4 a5 h3 e5",
+    "f3 Nc6 e4 Na5 Ke2 h5",
+    "b4 d5 d3 f6 e4 b5",
+    "e3 d6 Na3 c6 Nf3 h5",
+    "d3 f6 Kd2 c6 b4 Qc7",
+    "e4 c6 d3 f6 f3 c5",
+    "Nf3 e6 e3 Bb4 Nc3 Nc6",
+    "a4 e5 Nf3 d5 Ng5 Nd7",
+    "d3 f6 c3 h6 Na3 Nc6",
+    "d3 h5 Na3 b5 h4 Rh7"
+  ],
+  "prefix_plies": 6,
+  "prefix_seed": 2027,
+  "engine": {
+    "name": "Stockfish 18",
+    "skill_level": 3,
+    "nodes": 2000
+  },
+  "max_plies": 40,
+  "max_attempts": 3,
+  "temperature": 0.7,
+  "max_tokens": 2048,
+  "llm_seed": null,
+  "num_ctx": 6144,
+  "no_think": false,
+  "parallel": 2,
+  "prompt_version": "2",
+  "started_at": "2026-08-02T07:47:39-0700"
+}

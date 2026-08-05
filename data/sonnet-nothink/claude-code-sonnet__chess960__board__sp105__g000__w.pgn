@@ -1,0 +1,12 @@
+[Event "chessbench chess960 / history+board"]
+[Site "claude-code-sonnet__chess960__board__sp105__g000__w"]
+[Date "????.??.??"]
+[Round "?"]
+[White "claude-code:sonnet"]
+[Black "Stockfish 18"]
+[Result "0-1"]
+[FEN "qnrbbnkr/pppppppp/8/8/8/8/PPPPPPPP/QNRBBNKR w KQkq - 0 1"]
+[SetUp "1"]
+[Variant "Chess960"]
+
+1. e4 h5 0-1

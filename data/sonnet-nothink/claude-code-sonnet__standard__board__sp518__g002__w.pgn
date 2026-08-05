@@ -1,0 +1,9 @@
+[Event "chessbench standard / history+board"]
+[Site "claude-code-sonnet__standard__board__sp518__g002__w"]
+[Date "????.??.??"]
+[Round "?"]
+[White "claude-code:sonnet"]
+[Black "Stockfish 18"]
+[Result "0-1"]
+
+1. e4 e5 2. Nf3 d5 3. Nxe5 f6 4. Nf3 Qe7 5. d3 dxe4 6. dxe4 Be6 7. Be2 Qf7 8. O-O Nc6 9. Nc3 a6 10. Be3 Rd8 11. Nd5 Rd7 12. Nxc7+ Rxc7 13. Qd5 Rd7 0-1

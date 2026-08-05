@@ -320,6 +320,11 @@ uv run chessbench-viz runs/mine        # interactive HTML viewer
 uv run chessbench-anim runs/mine       # GIF per game
 ```
 
+Raw records for every published run live in [`data/`](data/) — verbatim
+prompts and model responses, per-attempt classifications, and full run
+manifests (seeds, engine build, prompt/parser versions). Re-run the
+analysis on them directly: `uv run chessbench-analyze data/sonnet-nothink`.
+
 Runs are resumable (completed games are never replayed), parallelizable
 (`--parallel`), and long local runs should use
 `scripts/run_supervised.sh <out_dir> <args...>` for self-healing.

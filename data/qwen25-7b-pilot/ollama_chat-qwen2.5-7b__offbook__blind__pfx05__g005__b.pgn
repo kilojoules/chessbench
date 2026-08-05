@@ -1,0 +1,9 @@
+[Event "chessbench standard-offbook / history-only"]
+[Site "ollama_chat-qwen2.5-7b__offbook__blind__pfx05__g005__b"]
+[Date "????.??.??"]
+[Round "?"]
+[White "Stockfish 18"]
+[Black "ollama_chat/qwen2.5:7b"]
+[Result "1-0"]
+
+1. e4 c6 2. d3 f6 3. f3 c5 4. Be3 d5 5. d4 cxd4 6. Qxd4 Nc6 7. Qa4 1-0
