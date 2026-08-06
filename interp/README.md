@@ -88,9 +88,35 @@ computation, after which the model falls back on its prior — the opening
 book. That is a real effect, but a much weaker (and confounded) claim than
 "this direction encodes the standard board."
 
-**Controls now running**, because this is exactly where an interp result
-goes wrong: (i) a gentler α range, to find a regime where the model still
-functions; (ii) a **random unit vector of the same norm** — if random
-steering reproduces the U-shape, the effect is generic damage, not our
-direction; (iii) a health proxy (log-prob of the best *legal* move) logged
-at every α, so degradation is visible rather than inferred.
+### 3c. The control kills the causal claim
+
+![steering control](steering_control.png)
+
+Gentle sweep (α ±0.5, ±1) against a **random unit vector of the same norm**,
+with model health logged as the log-prob of the best *legal* move:
+
+| | α = −1 | −0.5 | 0 | +0.5 | +1 |
+|---|---|---|---|---|---|
+| **real direction** — health | −5.51 | −4.44 | −3.91 | −3.78 | −3.95 |
+| **real direction** — phantom wins | 14/20 | 8/20 | 2/20 | 0/20 | 0/20 |
+| **random direction** — health | −3.77 | −3.62 | −3.91 | −4.68 | −5.60 |
+| **random direction** — phantom wins | 0/20 | 0/20 | 2/20 | 11/20 | 18/20 |
+
+The two sweeps disagree about which sign of α raises the phantom pull — and
+that is the tell. Plot phantom win rate against *model health* instead of α
+and both collapse onto a single curve: **r = −0.976**. The random direction
+reproduces the effect at least as strongly as the semantic one (18/20 at
+health −5.60 vs 14/20 at −5.51).
+
+**Conclusion: no causal support for a "standard back rank" feature.** What
+the intervention actually shows is that degrading the model — in *any*
+direction — makes it fall back on the opening book. That is consistent with
+the memorization account in a weak sense (the book is what remains when
+position-specific computation is disrupted), but it is emphatically not the
+directional claim, and reporting it as one would have been wrong.
+
+The correlational result (§2) stands on its own; the causal question is
+open. Honest next steps: linear probes for board state (does the model
+represent the *actual* back rank at all?), activation patching between
+matched positions rather than mean-difference steering, and a layer sweep —
+each with the random-direction control run alongside from the start.
