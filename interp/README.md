@@ -30,6 +30,8 @@ different serving stack and numeric precision.
 
 ## 2. Pull — the phantom is a permanent runner-up
 
+![phantom pull](phantom_pull.gif)
+
 Spontaneous phantoms are rare because the book move must beat every legal
 alternative outright. `phantom_pull.py` instead scores *every* legal move
 plus the classic book moves in 30 Chess960 positions × 2 visibility
@@ -41,19 +43,57 @@ conditions, and asks where the illegal book moves land.
 | board shown | #1 in 1/30, #2 in 16/30, #3 in 13/30 | `e4` (27/30), `Nf3` (3/30) |
 | *standard start (baseline)* | — (`Nf3` is legal and ranks #1) | `Nf3` |
 
-**In 60 of 60 position-conditions the best illegal book move ranked #2 or
-#3 out of ~20 legal moves.** The model's opening preference is essentially
-fixed: `Nf3` is its favourite from the standard array, and when the shuffle
-makes `Nf3` impossible it does not get eliminated — it slides to second
-place behind `e4`, the book move that survives the shuffle because pawns
-are never shuffled. Observed phantoms are the tail of that distribution:
-anything that perturbs the top-2 gap tips an illegal move into first place.
+The model's opening preference is essentially fixed: `Nf3` is its
+favourite from the standard array, and when the shuffle makes `Nf3`
+impossible it does not get eliminated — it slides to second place behind
+`e4`, the book move that survives the shuffle because pawns are never
+shuffled. Observed phantoms are the tail of that distribution: anything
+that perturbs the top-2 gap tips an illegal move into first place.
 
-The pull is **the same size with the board shown** (rank distribution
-16/13 vs 17/13). For this model, displaying the position does not reach the
-move-preference computation — the mechanistic counterpart of the
-benchmark's stale-state finding, where board-shown illegal attempts
-contradict the very board printed in the prompt.
+The pull is **the same size with the board shown**. For this model,
+displaying the position does not reach the move-preference computation —
+the mechanistic counterpart of the benchmark's stale-state finding, where
+board-shown illegal attempts contradict the very board printed in the
+prompt.
+
+### 2a. Adversarial re-analysis (2026-08-06): the corrected claim
+
+An earlier draft of this section headlined "the best illegal book move
+ranked #2 or #3 in 60/60 position-conditions." Two audits shrink and
+sharpen that claim:
+
+**Order-statistics null.** The metric takes the *best* of ~8 illegal book
+moves among ~28 candidates. Under a uniform-random null the expected best
+rank is already **#3.1**, so "#3" carries almost no evidence. Observed
+mean rank #2.4 vs null #3.1 — better than chance overall, but the
+headline conflated a real effect with near-null filler.
+
+**Decomposition by move identity.** Split the 60 rows by which move was
+"best illegal":
+
+| rows | best illegal book move | rank | reading |
+|---|---|---|---|
+| 33 | `Nf3` (shuffle makes it impossible*) | **#2 in 32/33**, #1 once | the real phantom pull |
+| 22 | `Nf6` — a **Black** move, White to move | #3 in 21/22 | ≈ null; wrong-side, illegal in standard chess too |
+| 5 | `d5` — also wrong-side | #3 in 5/5 | ≈ null |
+
+\* In 2 of the 33, g1 does hold a knight and `Nf3` is merely *ambiguous*
+(two knights reach f3), not impossible.
+
+So the honest statement is: **in every position where the shuffle makes
+`Nf3` impossible, `Nf3` still ranks #2 of ~28 candidates** (a single named
+move at #2, against a null rank of ~#14 — unambiguously non-null), while
+the wrong-side book moves show no pull beyond chance. The wrong-side rows
+also mean the metric mixed two phenomena: phantom-*standard* moves and
+plain wrong-side confusion; only the `Nf3` rows are phantoms.
+
+**What the pull cannot distinguish.** Rank(`Nf3`) = 2 is consistent with
+(a) the model believing the back rank is standard, and (b) the model
+having a context-free frequency prior over move *strings* ("Nf3" is the
+most common first move in chess text) with no board model at all. The
+visibility invariance and the steering null (§3c) both lean toward (b) —
+which is a stronger indictment of the model's chess, but a weaker claim
+about representation than "phantom of the standard board."
 
 ## 3. Steering — causal test (running)
 
