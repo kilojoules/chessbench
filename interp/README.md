@@ -90,10 +90,12 @@ plain wrong-side confusion; only the `Nf3` rows are phantoms.
 **What the pull cannot distinguish.** Rank(`Nf3`) = 2 is consistent with
 (a) the model believing the back rank is standard, and (b) the model
 having a context-free frequency prior over move *strings* ("Nf3" is the
-most common first move in chess text) with no board model at all. The
-visibility invariance and the steering null (§3c) both lean toward (b) —
-which is a stronger indictment of the model's chess, but a weaker claim
-about representation than "phantom of the standard board."
+most common first move in chess text) with no board model at all. Note
+that the pull's visibility invariance is **uninformative** here: at ply 1
+the starting FEN (present in both conditions) already specifies the full
+position, so the two visibility conditions are informationally identical
+and *had* to agree. §4 runs the experiment that actually separates (a)
+from (b).
 
 ## 3. Steering — causal test (running)
 
@@ -156,7 +158,55 @@ position-specific computation is disrupted), but it is emphatically not the
 directional claim, and reporting it as one would have been wrong.
 
 The correlational result (§2) stands on its own; the causal question is
-open. Honest next steps: linear probes for board state (does the model
-represent the *actual* back rank at all?), activation patching between
-matched positions rather than mean-difference steering, and a layer sweep —
-each with the random-direction control run alongside from the start.
+open.
+
+## 4. History test — the model tracks the board, weakly (2026-08-06)
+
+`phantom_history.py` separates the two readings of the pull. Ply-1
+Chess960 cannot do it (and memorized openings confound any famous line:
+corpora also never repeat `Nf3` after `1.Nf3`), so the test uses **seeded
+random legal games** on the standard board — out-of-distribution move
+sequences the model cannot have memorized — split by whether `Nf3` is
+legal at the endpoint (16 positions per group × 2 visibility conditions,
+score of `Nf3` vs every legal move).
+
+Story (b), the pure string prior, predicts no legality gap. Observed
+(Mann–Whitney on ranks):
+
+| condition | `Nf3` legal | `Nf3` illegal | gap |
+|---|---|---|---|
+| history-only | median rank **#2**/26, top-1 6/16 | median rank **#4**/28, top-1 2/16 | p = 0.029 |
+| history+board | median rank **#3**/26 | median rank **#7**/28, top-1 0/16 | p = 0.0002 |
+
+Both stories lose:
+
+- **Pure string prior (b) is dead.** The legality gap is real even in the
+  blindfold condition — from the move list alone, on random games, the
+  model knows *something* about whether a knight can reach f3.
+- **Board-believer (a) fares no better.** The tracking is far too weak to
+  act on: an *illegal* `Nf3` still sits at median rank #4 of ~28
+  blindfolded — in the top 15% of candidates, and outright #1 in 2/16
+  positions (e.g. after `1.f3`, with White's own pawn on f3, blindfolded
+  `Nf3` ranks **#1 of 45**).
+- **The board display does reach move selection** — the first such
+  evidence in this arm: within the illegal group, showing the board pushes
+  `Nf3` from median rank #3 to #6 (p = 0.0098). The pull's apparent
+  visibility invariance was a ply-1 artifact (see §2a).
+
+Anchors agree: after `1.Nf3 Nf6` (own knight on f3) `Nf3` drops to rank
+#2 blind / #6 shown with a large log-prob penalty, and in the corpus-zero
+knight-return line `1.Nf3 Nc6 2.Ng1 Nb8` the again-legal `Nf3` scores
+poorly (#3, lp −6.1) — position sensitivity without clean tracking.
+
+**Verdict: partial, leaky board-tracking.** The model carries a weak
+legality signal (present blindfolded, strengthened by the printed board)
+on top of a strong habit prior. Phantoms happen where they collide: the
+legality signal discounts an impossible move by a few ranks at most, so
+whenever the legal alternatives are weakly differentiated, the discounted
+book move still wins. Neither "believes the board is standard" nor "has
+no board at all" — it knows a little, and prefers by habit.
+
+Honest next steps: linear probes for board state (how *much* of the
+position is represented, and where?), activation patching between matched
+positions rather than mean-difference steering, and a layer sweep — each
+with the random-direction control run alongside from the start.
